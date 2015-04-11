@@ -1,0 +1,17 @@
+dc90d6799d0c53773c4c17131449aec8 *DESCRIPTION
+93e4668ae727ca73774dbeb9cc70a17a *NAMESPACE
+5850f85fd02893134f65241aab70885f *R/mvhist.R
+d7c4e6c82293bd731dcf6ea3e547c644 *R/mvmesh-methods.R
+ea65d22cc2dfe506efb29c2ed177edb9 *R/mvmesh.R
+5bb21ec8832eee2ac586e1d963644e06 *demo/00Index
+c835550ac2f94791782cffc9f05077b0 *demo/mvhist.R
+b109eb904ce30166286b7df3ae9a052c *demo/mvmesh.R
+2b9e994df33dd88ddf0b46f715684e89 *demo/mvmesh2.R
+f945a2f409c1dec17fe20b6414174420 *man/PolarSphere.Rd
+7f3cc807c1b59a06586c9981e0e274f0 *man/RectangularMesh.Rd
+951118e939a91357156fe0a4d9f45213 *man/UnitSimplex.Rd
+e6578785ae7df8ab188327bd867e5ac2 *man/UnitSphere.Rd
+09086994e4552f27164ea3c0647696c3 *man/mvhist.Rd
+788210c54cab0a97aeed923cbb50c5dd *man/mvmesh-geom.Rd
+3bba5208f0320f2ea6d410413d6e532f *man/mvmesh-methods.Rd
+7a846dd7584174e59d30d9d7bf148dac *man/mvmesh-package.Rd
