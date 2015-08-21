@@ -69,6 +69,19 @@ A <- Rotate3D( rep(pi/2,3) )
 mesh2 <- AffineTransform( mesh, A=A, shift=c(1,1,1) ) 
 plot(mesh2, new.plot=FALSE, col="red" )
 
+# different types of tubes
+p.range <- c(0.5,1,2,4,Inf)
+open3d()
+mfrow3d( nr=2, nc=length(p.range), byrow=FALSE, sharedMouse=TRUE )
+for (i in 1:length(p.range)) {
+  next3d()
+  plot( HollowTube( n=3, k.x=3, p=p.range[i]), new.plot=FALSE, col=i ) 
+  next3d()
+  plot( SolidTube( n=3, k.x=3, p=p.range[i]), new.plot=FALSE, col=i )
+  title3d( paste("p=",p.range[i]) )
+}
+
+
 # check UnitSimplex in different dimensions
 for (n in 2:5) {
   for (k in 1:4) {

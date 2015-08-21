@@ -401,3 +401,35 @@ for (k in 1:nS) {
 }
 aspect3d( 1,1,1 )
 }
+#########################################################################
+histDirectionalQuantileThreshold <- function( x, probs=1, p=2, k=3, positive.only=FALSE, ... ) {
+# Plot directional histogram for the data in matrix x with thresholding 
+# determined by quantiles of the data.  length(probs) plots are produced, with plot i
+# showing the upper extreme probs[i]-percentile of the data.  Thresholding
+# is determined using the p-th power norm. k=number of subdivisions.
+
+rowsums <- (rowSums( abs(x)^p ))^(1/p)
+thresholds <- quantile( rowsums, 1-probs )
+for (i in 1:length(thresholds)) {
+  keep <- which( rowsums >= thresholds[i] )
+  cat("plot",i,"  threshold=",thresholds[i],"  length(keep)=",length(keep),"   fraction kept=",probs[i],"\n")
+  histDirectional( x[keep,], k=k, p=p, positive.only=positive.only, ... )
+  title.str <- paste(100*probs[i],"% of data, ",length(keep)," values",sep="" )
+  if (ncol(x) == 3) { title3d( title.str ) } else { title( title.str ) }
+}}
+#########################################################################
+histDirectionalAbsoluteThreshold <- function( x, thresholds=0, p=2, k=3, positive.only=FALSE, ... ) {
+# Plot directional histogram for the data in matrix x with thresholding 
+# determined by abolute threshold.  length(probs) plots are produced, with plot i
+# showing the data values .  Thresholding
+# is determined using the p-th power norm. k=number of subdivisions.
+
+rowsums <- (rowSums( abs(x)^p ))^(1/p)
+for (i in 1:length(thresholds)) {
+  keep <- which( rowsums >= thresholds[i] )
+  cat("plot",i,"  thresholds=",thresholds[i],"  length(keep)=",length(keep),"\n")  
+  histDirectional( x[keep,], k=k, p=p, positive.only=positive.only, ... )
+  title.str <- paste("threshold=",thresholds[i],",  ", length(keep)," values",sep="" )
+  if (ncol(x) == 3) { title3d( title.str ) } else { title( title.str ) }
+}}
+

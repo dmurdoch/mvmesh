@@ -13,7 +13,7 @@
 #  information telling which points are the vertices of a simplex). 
 #
 #####################################################################
-UnitSimplex <- function( n, k ) {
+UnitSimplex <- function( n, k=1 ) {
 #   Generate a uniform mesh on the unit simplex in R^n by a
 #   k-subdivision of each edge.  The unit simplex is the
 #   (n-1) dimensional surface given by the convex
@@ -41,11 +41,11 @@ else {
 # calculate the (unique) vertices among all sub simplices
 a <- SVIFromColor(S,T)
 
-mesh <- list(type="unit simplex",mvmesh.type=1L,n=n,m=n-1L,vps=n,S=subS,V=a$V,SVI=a$SVI,k=k)
+mesh <- list(type="UnitSimplex",mvmesh.type=1L,n=n,m=n-1L,vps=n,S=subS,V=a$V,SVI=a$SVI,k=k)
 class(mesh) <- "mvmesh"
 return(mesh) }
 #####################################################################
-SolidSimplex <- function( n, k ) {
+SolidSimplex <- function( n, k=1 ) {
 #   Generate a uniform mesh on the canonical simplex in R^n by a
 #   k-subdivision of each face.  The canonical simplex is an
 #   n dimensional solid; it is the convex hull of the standard basis 
@@ -74,11 +74,11 @@ else {
 # calc ulate the (unique) vertices among all sub simplices
 a <- SVIFromColor(S,T)
 
-mesh <- list(type="solid simplex",mvmesh.type=2L,n=n,m=n,vps=n+1L,S=subS,V=a$V,SVI=a$SVI,k=k)
+mesh <- list(type="SolidSimplex",mvmesh.type=2L,n=n,m=n,vps=n+1L,S=subS,V=a$V,SVI=a$SVI,k=k)
 class(mesh) <- "mvmesh"
 return(mesh) }
 #####################################################################
-UnitSphere <- function( n, k, method="dyadic", p=2, positive.only=FALSE ) {
+UnitSphere <- function( n, k=1, method="dyadic", p=2, positive.only=FALSE ) {
 # Generate an "approximately uniform" mesh on the l^p unit ball in R^n. 
 # This mesh is exactly uniform when p=1; in other cases, the curvature of 
 # the ball makes spacing unequal. 
@@ -176,7 +176,7 @@ for (i in 1:nSVI) {
   }
 }
 
-mesh <- list( type="unit sphere, edgewise",mvmesh.type=3L,n=n,m=n-1L,vps=n,  
+mesh <- list( type="UnitSphere, edgewise",mvmesh.type=3L,n=n,m=n-1L,vps=n,  
        S=subS, V=V, SVI=SVI, k=k, p=p , positive.only=positive.only)
 class(mesh) <- "mvmesh"
 return( mesh ) }
@@ -235,12 +235,12 @@ for (j in 1:nS) {
   S[,,j] <- V[SVI[,j], ]
 }
 
-mesh <- list( type="unit sphere, dyadic", mvmesh.type=4L, n=n, m=n-1L, vps=n, S=S, V=V, SVI=SVI, 
+mesh <- list( type="UnitSphere, dyadic", mvmesh.type=4L, n=n, m=n-1L, vps=n, S=S, V=V, SVI=SVI, 
            k=k, p=p, start=start, positive.only=positive.only ) 
 class(mesh) <- "mvmesh"
 return(mesh) }
 #####################################################################
-UnitBall <- function( n, k, method="dyadic", p=2, positive.only=FALSE ) {
+UnitBall <- function( n, k=1, method="dyadic", p=2, positive.only=FALSE ) {
 # Generate a simplicial approximation to the unit ball consisting
 # of simplices with the origin at one vertex and the vertices of 
 # hyperspherical triangles on the unit sphere as the other vertices.
@@ -263,7 +263,7 @@ for (i in 1:nS) {
 }
 newSVI <- rbind( sphere$SVI, rep( nV, nS ) )
 
-mesh <- list(type=paste("unit ball,",method),mvmesh.type=ifelse(method=="edgewise",5L,6L),
+mesh <- list(type=paste("UnitBall,",method),mvmesh.type=ifelse(method=="edgewise",5L,6L),
           n=n,m=n,vps=n+1L,S=newS,V=newV,SVI=newSVI,
           k=k,method=method,p=p,positive.only=positive.only)
 class(mesh) <- "mvmesh"
@@ -296,7 +296,7 @@ for (k in 1:nS) {
   }
 }
 
-mesh <- list(type="polar sphere",mvmesh.type=9L,
+mesh <- list(type="PolarSphere",mvmesh.type=9L,
           n=n,m=n-1L,vps=vps,S=S,V=V,SVI=rect.mesh$SVI,
           breaks=breaks,p=p,positive.only=positive.only)
 class(mesh) <- "mvmesh"
@@ -325,7 +325,7 @@ for (k in 1:nS) {
 }
 newSVI <- rbind( sphere$SVI, rep( nV, nS ) )
 
-mesh <- list(type="polar ball",mvmesh.type=10L,
+mesh <- list(type="PolarBall",mvmesh.type=10L,
           n=n,m=n,vps=vps,S=newS,V=newV,SVI=newSVI,
           breaks=breaks,p=p,positive.only=positive.only)
 class(mesh) <- "mvmesh"
@@ -422,10 +422,127 @@ while (i[1] > 0) {
   j <- j + 1L
 }
 
-mesh <- list(type="rectangular",mvmesh.type=7L,n=n,m=n,vps=as.integer(2^n),S=S,V=V,SVI=SVI,
+mesh <- list(type="RectangularMesh",mvmesh.type=7L,n=n,m=n,vps=as.integer(2^n),S=S,V=V,SVI=SVI,
      a=a,b=b,breaks=breaks)
 class(mesh) <- "mvmesh"
 return(mesh) }
+#####################################################################
+HollowTube <- function( n, k.x=1, k.circumference=2, method="dyadic", p=2 ){
+# define a 'horizontal' hollow tube in n dimesions, an (n-1) dimensional 
+#    surface of SolidTube( )
+
+n <- as.integer(n)
+k.x <- as.integer(k.x)
+k.circumfernce <- as.integer(k.circumference)
+stopifnot( n >= 2, k.x >= 1, k.circumference >= 1 )
+
+x.grid <- seq(0,1,length=k.x+1)
+vps <- 2*(n-1)
+if (n==2){
+  # in two dimensions, treat each line segment as a separate, unconnected 1-simplex
+  nS <- 2*k.x
+  SVI <- matrix( 0L, nrow=vps, ncol=nS )
+  V <- cbind( rep(x.grid,2), c(rep(1,k.x+1),rep(-1,k.x+1) ) )
+  for (i in 1:k.x) {
+    SVI[ ,i] <- c(i,i+1)
+    SVI[ ,i+k.x] <- c(i+k.x+1,i+k.x+2)    
+  }
+} else {
+  # n > 2, use cross product of x.grid and (n-1)-dim. sphere
+  sphere <- UnitSphere(n=n-1,k=k.circumference,method=method,p=p)
+  nS.sphere <- dim(sphere$S)[3] # number of simplices in sphere
+  nV.sphere <- nrow(sphere$V)
+
+  V <- matrix( 0.0, nrow=(k.x+1)*nV.sphere, ncol=n )
+  k <- 0
+  for (i in 1:(k.x+1)) {
+    for (j in 1:nV.sphere) {
+      k <- k + 1
+      V[k, ] <- c( x.grid[i], sphere$V[j,] )
+    }
+  }
+  nS <- k.x * nS.sphere  
+  SVI <- matrix( 0L, nrow=vps, ncol=nS )  
+  k <- 0
+  for (i in 1:k.x) {
+    for (j in 1:nS.sphere) {
+      k <- k + 1
+      SVI[ ,k] <- c( (i-1)*nV.sphere + sphere$SVI[,j], rev(i*nV.sphere + sphere$SVI[,j]) ) 
+    }
+  }  
+}
+
+# define S array using V and SVI
+S <- array( 0.0, dim=c(vps,n,nS ) )
+for (i in 1:nS) {
+  for (j in 1:vps) {
+    S[j, ,i] <- V[SVI[j,i],]
+  }
+}
+
+mesh <- list(type="HollowTube",mvmesh.type=11L,n=n,vps=vps,S=S,V=V,SVI=SVI,
+    k.x=k.x,k.circumference=k.circumference)
+class(mesh) <- "mvmesh"
+return(mesh)}
+#####################################################################
+SolidTube <- function( n, k.x=1, k.circumference=2, 
+    method="dyadic", p=2 ){
+# define a 'horizontal' solid rod in n dimensions, an n dimensional 
+# solid region inside HollowTube( )
+
+n <- as.integer(n)
+k.x <- as.integer(k.x)
+k.circumfernce <- as.integer(k.circumference)
+stopifnot( n >= 2, k.x >= 1, k.circumference >= 1 )
+
+x.grid <- seq(0,1,length=k.x+1)
+vps <- 2*n
+if (n==2){
+  # in two dimensions, treat as 2-simplex
+  nS <- k.x
+  SVI <- matrix( 0L, nrow=vps, ncol=nS )
+  V <- cbind( rep(x.grid,2), c(rep(1,k.x+1),rep(-1,k.x+1) ) )
+  for (i in 1:nS) {   
+    SVI[ ,i] <- c(i,i+1,i+k.x+2,i+k.x+1)    
+  }
+} else {
+  # n > 2, use cross product of x.grid and (n-1)-dim. ball
+  ball <- UnitBall(n=n-1,k=k.circumference,method=method,p=p)
+  nS.ball <- dim(ball$S)[3] # number of simplices in ball
+  nV.ball <- nrow(ball$V)
+
+  V <- matrix( 0.0, nrow=(k.x+1)*nV.ball, ncol=n )
+  k <- 0
+  for (i in 1:(k.x+1)) {
+    for (j in 1:nV.ball) {
+      k <- k + 1
+      V[k, ] <- c( x.grid[i], ball$V[j,] )
+    }
+  }
+  nS <- k.x * nS.ball  
+  SVI <- matrix( 0L, nrow=vps, ncol=nS )  
+  k <- 0
+  for (i in 1:k.x) {
+    for (j in 1:nS.ball) {
+      k <- k + 1
+      SVI[ ,k] <- c( (i-1)*nV.ball + ball$SVI[,j], rev(i*nV.ball + ball$SVI[,j]) ) 
+    }
+  }   
+}
+
+# define S array using V and SVI
+S <- array( 0.0, dim=c(vps,n,nS ) )
+for (i in 1:nS) {
+  for (j in 1:vps) {
+    S[j, ,i] <- V[SVI[j,i],]
+  }
+}
+
+
+mesh <- list(type="SolidTube",mvmesh.type=12L,n=n,vps=n,S=S,V=V,SVI=SVI,
+    k.x=k.x,k.circumference=k.circumference)
+class(mesh) <- "mvmesh"
+return(mesh)}
 #####################################################################
 NextMultiIndex <- function( i, n ) {
 # compute the next multi-index beyond (i[1],...,i[k]), with each i[j] in the range 1:n[j]
@@ -718,7 +835,7 @@ S <- array( 0.0, dim=c(3,3,20))
 for (k in 1:20) {
   S[ ,,k] <- V[ SVI[,k],  ]
 }
-mesh <- list( type="icosahedron", mvmesh.type=8L, n=3L,k=NA, originalS=S, S=S, V=V, SVI=SVI )
+mesh <- list( type="Icosahedron", mvmesh.type=8L, n=3L,k=NA, originalS=S, S=S, V=V, SVI=SVI )
 class(mesh) <- "mvmesh"
 return( mesh ) }
 #####################################################################
@@ -798,7 +915,7 @@ nS <- dim(S)[3]
 dim.Hrep <- c(0L,0L)
 for (k in 1:nS) {
   Vk <- makeV( S[,,k] )
-  tmp <- rcdd::scdd( Vk )$output  
+  tmp <- rcdd::scdd( Vk, representation="V" )$output  
   if (k==1) { 
     dim.Hrep <- dim(tmp)
     H <- array( 0.0, dim=c(dim.Hrep,nS) ) 
@@ -823,7 +940,7 @@ stopifnot( is.array(H), length(dimH)==3 )
 nS <- dimH[3]
 dim.Vrep <- c(0L,0L)
 for (k in 1:nS) {
-  tmp <- rcdd::scdd( H[,,k] )$output[ ,-c(1,2)]
+  tmp <- rcdd::scdd( H[,,k], representation="H" )$output[ ,-c(1,2),drop=FALSE]
   if (k==1) {
     dim.Vrep <- dim(tmp)
     S <- array( 0.0, dim=c(dim(tmp),nS)) 
@@ -913,4 +1030,101 @@ for (j in 1:m) {
   }
 }
 return(list(r=r,theta=theta))}
+##################################################################################
+IntersectMultipleSimplicesV <- function( S1, S2 ) {
+# Find the pairwise intersection of two lists of simplices, both given in the V-representation.
+# only the intersections with positive volume are returned
+# S1 is an (n x m1 x nS1) array, with S1[,,k] being the V-representation of the k-th 
+#    simplex in the first set of simplices
+# S2 is an (n x m2 x nS2) array, with S2[,,k] being the V-representation of the k-th 
+#    simplex in the second set of simplices
+# Note that all simplices in S1 must have the same number of vertices, and all
+#   simplices in S2 must have the same number of vertices.  The function Intersect2SimplicesH( )
+#   handles the intersection of two arbitrary simplices, but for convenience here we
+#   require unform sizes within S1 and within S2.
+#   
+# return a list with 3 fields:
+#   S  an (n x (n+1) x nS) array, list of resulting simplices
+#   index1[1:nS] integer array 
+#   index2[1:nS] integer array
+#   S[,,k] is in the intersection of S1[,,index1[k]] and S2[,,index2[k]]
+#  Since the intersection may be an n-simplex with more than (n+1) vertices,
+#  each intersection is 'triangulated' to be decomposed into simplices with exactly (n+1) vertices
+
+H1 <- V2Hrep( S1 )
+H2 <- V2Hrep( S2 )
+return( IntersectMultipleSimplicesH( H1, H2 ) ) }
+##################################################################################
+IntersectMultipleSimplicesH <- function( H1, H2 ) {
+# Similar to IntersectSimplicesV, but now the simplices are given in
+# the H-representation
+
+stopifnot( ncol(H1)==ncol(H2) )
+n <- ncol(H1)-2
+count <- 0
+S <- array( 0.0, dim=c(n+1,n,0) )
+index1 <- integer(0)
+index2 <- index1
+nS1 <- dim(H1)[3]
+nS2 <- dim(H2)[3]
+for (i2 in 1:nS2) {
+  for (i1 in 1:nS1) {
+    a <- Intersect2SimplicesH( H1[,,i1], H2[,,i2], tesselate=TRUE )
+cat("-----------------------------\ni1=",i1,"  i2=",i2,"\n")
+print(H1[,,i1]); print( H2Vrep( H1[,,i1] ))
+print(H2[,,i2]); print( H2Vrep( H2[,,i2] ))
+print(str(a))
+    if(!is.null(a$S)) {
+      S <- abind( S, a$S, force.array=TRUE )
+      m <- dim(a$S)[3]
+      index1 <- c(index1,rep(i1,m))
+      index2 <- c(index2,rep(i2,m))
+    }
+  }
+}
+return( list( S=S, index1=index1, index2=index2 ) )}
+##################################################################################
+Intersect2SimplicesH <- function( H1, H2, tesselate=FALSE ) {
+# intersect two arbitrary simplices given by their H-represenations H1 and H2
+# if tesselate=TRUE, the resulting set is tesselated so that we get 
+#
+# Return a list with fields:
+#   H = H-representation of the intersection simplex
+#   V = vertices (V-rep.) of the intersection simplex (NULL if intersection has zero volume)
+#   S = tesselation of the intersection simplex (if tesselate=TRUE, NULL if intersection has zero volume)
+
+n <- ncol(H1)-2
+H <- rcdd::redundant( rbind( H1, H2 ), representation="H")$output
+V <- NULL
+S <- NULL
+if( nrow(H) > n) {
+  V <- H2Vrep( H )[,,1] 
+  if (tesselate & (nrow(V) > n)) {
+    del.tess <- geometry::delaunayn( V )
+    S <- array( 0.0, dim=c(n+1,n,nrow(del.tess)) )
+    for (k in 1:nrow(del.tess)) {
+      b <- del.tess[k,]
+      cur.tess <- rbind(V[b[1],],V[b[2],],V[b[3],])
+      S[,,k] <- cur.tess
+    }
+  }
+}
+return( list(H=H, V=V, S=S) ) }
+##################################################################################
+Lift2UnitSimplex <- function( S ){
+# In several places a simplex S on the unit simplex in R^n is projected onto
+#   S[,-n] in R^(n-1).  This function is the inverse of that projection:
+#   it lifts that projection back to the unit simplex.
+
+n <- nrow(S)
+if (is.matrix(S)) { S <- array(S,dim=c(nrow(S),ncol(S),1) )}
+stopifnot( is.array(S), length(dim(S))==3 )
+
+nS <- dim(S)[3]
+S2 <- array( 0.0, dim=c(n,n,nS) ) 
+for (k in 1:nS) { 
+  tmp <- 1-rowSums( S[,,k,drop=FALSE] )
+  S2[,,k] <- cbind(S[,,k],tmp)
+}
+return(S2) }
 #######################################################################

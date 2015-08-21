@@ -15,15 +15,18 @@
 \alias{PointCoord}
 \alias{SimplexCoord}
 \alias{SVIFromColor}
+\alias{IntersectMultipleSimplicesV}
+\alias{IntersectMultipleSimplicesH}
+\alias{Intersect2SimplicesH}
+\alias{Lift2UnitSimplex}
 
-\title{Miscellaneous functions for working with multivariate meshes
+\title{Miscellaneous computational geometry and utility functions
 }
 \description{\code{EdgeSubdivision} calculates an equal area/volume subdivision of a simplex.
-\code{AffineTransformMesh} define new mesh by translating all vertices by A %*% v + shift.
+\code{AffineTransform} defines a new mesh by translating all points x to x' = A %*% x + shift.
 \code{Rotate2D} and \code{Rotate3D} calculate rotation matrices for use by \code{AffineTransform}.
 
-\code{Icosahedron} returns the vertices of the icosahedron with vertices on the
-unit sphere
+\code{Icosahedron} returns the vertices of an icosahedron with vertices on the unit sphere
 
 Other functions are internal functions, use at your own risk.
 }
@@ -46,6 +49,10 @@ V2Hrep( S )
 H2Vrep( H ) 
 SatisfyHrep( x, Hsingle )
 HrepCones( S )
+IntersectMultipleSimplicesV( S1, S2 )
+IntersectMultipleSimplicesH( H1, H2 )
+Intersect2SimplicesH( H1, H2, tesselate=FALSE )
+Lift2UnitSimplex(S)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -78,9 +85,9 @@ HrepCones( S )
 }
   \item{p}{power in the l^p norm
 }
-  \item{S}{matrix of size (vps x n) specifying the vertices of a single simplex; S[j,] is the j-th vertex of S
+  \item{S,S1,S2}{matrix of size (vps x n) specifying the vertices of a single simplex; S[j,] is the j-th vertex of S
 }
-  \item{SVI}{Simplex Vertice Index, see \code{\link{mvmesh}}
+  \item{SVI}{Simplex Vertex Indices, see \code{\link{mvmesh}}
 }
   \item{m}{positive integer to be converted to base 'b'
 }
@@ -92,11 +99,13 @@ HrepCones( S )
 }
   \item{T}{array giving a list of color matrices
 }
-  \item{H}{array of simplices in the H-representation, H[,,k] is the H-representation for the k-th simplex
+  \item{H,H1,H2}{array of simplices in the H-representation, H[,,k] is the H-representation for the k-th simplex
 }
   \item{x}{matrix with columns giving the points
 }
   \item{Hsingle}{matrix giving the H-representation of a single simplex
+}
+  \item{tesselate}{TRUE to tesselate the resulting intersection
 }
 }
 \details{\code{AffineTransform} computes a new mesh from a previous one, with each vertex v being replaced
@@ -113,6 +122,13 @@ an error will occur.  To work with such cases, call the function separately for 
 different size objects. The one place where this can occur with mvmesh objects is with a
 PolarSphere or PolarBall: at the places where polar coordinates are nonunique, vertices
 will repeat and the H-representation will have fewer constraints than other simplices.
+
+\code{IntersectMultipleSimplicesV} computes the pairwise intersection of two lists of simplices given in the V-representation.
+\code{IntersectMultipleSimplicesH} computes the pairwise intersection of two lists of simplices given in the H-representation.
+\code{Intersect2SimplicesH} computes the intersection of two simplices, both specified in the H-representation.
+
+\code{Lift2UnitSimplex} reverses the projection from the unit simplex in n-space to the first (n-1) coordinates.  That is,
+it 'lifts' each  (n-1) dimensional simplex in R^(n-1) to the unit simplex in R^n by appending an n-th coordinate, with x[n] <- 1-sum(x[1:(n-1)]).
 }
 
 \value{\code{MatchRow} returns an integer vector, showing which rows of table match v.

@@ -21,7 +21,7 @@ plot.mvmesh <- function( x, new.plot=TRUE, show.points=FALSE, show.edges=TRUE, s
 # check input & define values
 if( class(x) != "mvmesh" ) stop( "x is not a mesh object" )
 n <- ncol(x$S)
-if( (n < 2) | (n > 3) ) stop( "x is not a 2 or 3 dimensional simplex" )
+if( (n < 2) | (n > 3) ) stop( "x is not a 2 or 3 dimensional object" )
 stopifnot( nrow(x$S) >= 1 )
 nS <- dim(x$S)[3]   
 if( is.null(label.values) ) { label.values <- 1:nS }
@@ -99,10 +99,12 @@ if (mvmesh.type==7L) {
   }
 } else {
   m <- nrow(S)  
-  for (i in 1:(m-1)) {
-    for (j in (i+1):m) {
-      if (show.edges) { lines3d(S[c(i, j),1],S[c(i, j),2],S[c(i, j),3],...) }
-    }  
+  if (show.edges) { 
+    for (i in 1:(m-1)) {
+      for (j in (i+1):m) {
+        lines3d(S[c(i, j),1],S[c(i, j),2],S[c(i, j),3],...) 
+      }  
+    }
   }
   if (show.faces) { 
     if (nrow(S)==3) { rgl.triangles( S, ... ) } 
