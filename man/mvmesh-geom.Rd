@@ -19,6 +19,7 @@
 \alias{IntersectMultipleSimplicesH}
 \alias{Intersect2SimplicesH}
 \alias{Lift2UnitSimplex}
+%\alias{TransposeMultipleMatrices}
 
 \title{Miscellaneous computational geometry and utility functions
 }
@@ -53,6 +54,7 @@ IntersectMultipleSimplicesV( S1, S2 )
 IntersectMultipleSimplicesH( H1, H2 )
 Intersect2SimplicesH( H1, H2, tesselate=FALSE )
 Lift2UnitSimplex(S)
+%TransposeMultipleMatrices(B)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -107,6 +109,7 @@ Lift2UnitSimplex(S)
 }
   \item{tesselate}{TRUE to tesselate the resulting intersection
 }
+% \item{B}{an (m x n x p) array}
 }
 \details{\code{AffineTransform} computes a new mesh from a previous one, with each vertex v being replaced
 by A %*% v + shift. \code{Rotate2D} computes a 2D rotation matrix, 
@@ -129,6 +132,8 @@ will repeat and the H-representation will have fewer constraints than other simp
 
 \code{Lift2UnitSimplex} reverses the projection from the unit simplex in n-space to the first (n-1) coordinates.  That is,
 it 'lifts' each  (n-1) dimensional simplex in R^(n-1) to the unit simplex in R^n by appending an n-th coordinate, with x[n] <- 1-sum(x[1:(n-1)]).
+
+%\code{TransposeMultipleMatrices} computes an array C of size (n x m x p), with C[,,i]=t(B[,,i]). 
 }
 
 \value{\code{MatchRow} returns an integer vector, showing which rows of table match v.

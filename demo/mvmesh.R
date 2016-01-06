@@ -78,7 +78,7 @@ for (i in 1:length(p.range)) {
   plot( HollowTube( n=3, k.x=3, p=p.range[i]), new.plot=FALSE, col=i ) 
   next3d()
   plot( SolidTube( n=3, k.x=3, p=p.range[i]), new.plot=FALSE, col=i )
-  title3d( paste("p=",p.range[i]) )
+  title3d( paste("tubes with p=",p.range[i]) )
 }
 
 

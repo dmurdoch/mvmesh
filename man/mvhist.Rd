@@ -14,7 +14,7 @@
 \description{Tabulate and plot histograms for multivariate data, including directional histograms}
 \usage{
 histDirectional( x, k, p=2, plot.type="default", freq=TRUE, positive.only=FALSE, 
-     report="summary", ... )
+     report="summary", label.octants=TRUE, normalize.by.area=FALSE, ... )
 histDirectionalQuantileThreshold( x, probs=1, p=2, k=3, positive.only=FALSE, ... )
 histDirectionalAbsoluteThreshold( x, thresholds=0, p=2, k=3, positive.only=FALSE,...)     
 histRectangular( x, breaks=10, plot.type="default", freq=TRUE, report="summary", ... )
@@ -31,8 +31,13 @@ DrawPillars( S, height, shift=rep(0.0,3), ... )
 }
   \item{p}{power of p-norm
 }
-  \item{freq}{TRUE for a frequency histogram, FALSE for a relative frequency histogram
+  \item{freq}{TRUE for a frequency histogram, FALSE for a relative frequency histogram.  See note about normalize.by.area
 }
+  \item{normalize.by.area}{if TRUE, then the counts are normalized by the surface area of the corresponding
+simplex on the sphere.  This is useful since in general the surface area varies and counts will vary 
+accordingly.  In particular, isotropic data will not appear isotropic without setting this to TRUE.
+If TRUE, the value of freq is ignored: the histogram always shows count/surface area
+} 
   \item{breaks}{specifes the subdivision of the region; see 'breaks' in \code{\link{RectangularMesh}}
 }
   \item{plot.type}{type of plot, see details below
@@ -40,6 +45,8 @@ DrawPillars( S, height, shift=rep(0.0,3), ... )
   \item{positive.only}{If TRUE, look only in the first octant
 }
   \item{report}{level of warning messages; one of "summary", "all", "none".
+}
+  \item{label.octants}{If plot.type="index", this controls whether or not the octants are labeled on the plot.
 }
   \item{probs}{vector of probabilites specifying what fraction of the extremes to keep
 }

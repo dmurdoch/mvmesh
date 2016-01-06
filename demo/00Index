@@ -1,3 +1,4 @@
 mvmesh    examples from the mvmesh package
 mvhist    examples of multivariate histograms
-mvmesh2   longer test of mvmesh functions 
+mvmesh2   longer test of mvmesh functions
+mvmeshmisc   tests of some misc. functions

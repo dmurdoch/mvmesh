@@ -99,7 +99,7 @@ UnitSphere <- function( n, k=1, method="dyadic", p=2, positive.only=FALSE ) {
 
 n <- as.integer( n )
 k <- as.integer( k )
-stopifnot( n > 1, k > 0, method %in% c("dyadic","edgewise"), length(p)==1, 
+stopifnot( n > 1, k >= 0, method %in% c("dyadic","edgewise"), length(p)==1, 
            p > 0, is.logical(positive.only) )
 
 if (method=="edgewise") {
@@ -115,6 +115,7 @@ UnitSphereEdgewise <- function( n, k, p, positive.only ) {
 
 n <- as.integer( n )
 k <- as.integer( k )
+stopifnot(k > 0)
 #  compute the part of the ball in the positive orthant
 a <- UnitSimplex( n=n, k=k )
 V <- a$V
@@ -771,22 +772,17 @@ M <- nrow(new$V); L <- ncol(new$SVI)
 Vnew <- matrix(0.0,ncol=n,nrow=nS*M)
 SVInew <- matrix( 0L, nrow=vps, ncol=nS*L)
 
-# fill first block of new subsimplices
-Vnew[1:M, ] <- new$V
-SVInew[ ,1:L] <- new$SVI
-Vend <- M
-SVIend <- L
-
-# loop through remaining simplices, subdividing each
-if (nS > 1) {
-  for (i in 2:nS) { 
-    new <- SVIFromColor( V[SVI[,i], ], T )
-    Vnew[ (Vend+1):(Vend+M), ] <- new$V
-    SVInew[ ,(SVIend+1):(SVIend+L)] <- new$SVI + Vend
-    Vend <- Vend+M    
-    SVIend <- SVIend + L
-  }
+# loop through simplices, subdividing each
+Vend <- 0L
+SVIend <- 0L
+for (i in 1:nS) { 
+  new <- SVIFromColor( V[SVI[,i], ], T )
+  Vnew[ (Vend+1):(Vend+M), ] <- new$V
+  SVInew[ ,(SVIend+1):(SVIend+L)] <- new$SVI + Vend
+  Vend <- Vend+M    
+  SVIend <- SVIend + L
 }
+
 
 # eliminate duplicate vertices. Duplicates happen when some of original
 # simplices share edges
@@ -806,12 +802,12 @@ for (i in 2:Vend) {
 
 # If requested, normalize to be on unit sphere in l^p norm
 if (normalize) {
-  r <- LpNorm(Vnew,p)
+  r <- LpNorm(Vnew[1:count,],p)
   for (i in 1:count) {
     Vnew[i,] <- Vnew[i,]/r[i]
   }
-}
- 
+}  
+
 mesh <- list( V=Vnew[1:count,], SVI=SVInew) 
 class(mesh) <- "mvmesh"
 return(mesh)}
@@ -1070,15 +1066,11 @@ nS2 <- dim(H2)[3]
 for (i2 in 1:nS2) {
   for (i1 in 1:nS1) {
     a <- Intersect2SimplicesH( H1[,,i1], H2[,,i2], tesselate=TRUE )
-cat("-----------------------------\ni1=",i1,"  i2=",i2,"\n")
-print(H1[,,i1]); print( H2Vrep( H1[,,i1] ))
-print(H2[,,i2]); print( H2Vrep( H2[,,i2] ))
-print(str(a))
-    if(!is.null(a$S)) {
-      S <- abind( S, a$S, force.array=TRUE )
+    if(!is.null(a$S)) { 
       m <- dim(a$S)[3]
       index1 <- c(index1,rep(i1,m))
       index2 <- c(index2,rep(i2,m))
+      S <- abind( S, a$S, force.array=TRUE )      
     }
   }
 }
@@ -1092,7 +1084,7 @@ Intersect2SimplicesH <- function( H1, H2, tesselate=FALSE ) {
 #   H = H-representation of the intersection simplex
 #   V = vertices (V-rep.) of the intersection simplex (NULL if intersection has zero volume)
 #   S = tesselation of the intersection simplex (if tesselate=TRUE, NULL if intersection has zero volume)
-
+cat("Intersect2...\n")
 n <- ncol(H1)-2
 H <- rcdd::redundant( rbind( H1, H2 ), representation="H")$output
 V <- NULL
@@ -1100,11 +1092,12 @@ S <- NULL
 if( nrow(H) > n) {
   V <- H2Vrep( H )[,,1] 
   if (tesselate & (nrow(V) > n)) {
-    del.tess <- geometry::delaunayn( V )
+cat("V="); print(V)
+    del.tess <- geometry::delaunayn( V, options="Qz" )
     S <- array( 0.0, dim=c(n+1,n,nrow(del.tess)) )
     for (k in 1:nrow(del.tess)) {
       b <- del.tess[k,]
-      cur.tess <- rbind(V[b[1],],V[b[2],],V[b[3],])
+      cur.tess <- V[b,]
       S[,,k] <- cur.tess
     }
   }
@@ -1127,4 +1120,158 @@ for (k in 1:nS) {
   S2[,,k] <- cbind(S[,,k],tmp)
 }
 return(S2) }
-#######################################################################
+##################################################################################
+# replace with aperm( B, c(2,1,3) )
+#TransposeMultipleMatrices <- function( B ) {
+#  For the (n x m x p) array B, compute the (m x n x p) array C
+#  with C[,,i] = t(B[,,i])
+
+#if( is.matrix(B) ) { return( t(B) ) }
+#dimB <- dim(B)
+#C <- array( 0.0, dim=c(dimB[2],dimB[1],dimB[3]) )
+#for (i in 1:dimB[3]) {  C[,,i] <- t(B[,,i]) }
+#return(C) }
+########################################################################
+mvmeshFromSVI <- function( V, SVI ) {
+# construct an mvmesh object from a tessellation: 
+#  V = nV x n matrix of vertices; V[i,] is the i-th vertex
+#  SVI = vps x nS matrix of integer indices SVI giving the grouping;
+#        SVI[,j] gives the indices of vertices that make up simplex j
+# Note: this assumes that the faces are all of dimension (vps-1)
+
+vps <- nrow(SVI)
+n <- ncol(V)
+nS <- ncol(SVI)
+S <- array( 0.0, dim=c(vps,n,nS) )
+for (i in 1:nS) {
+  for (j in 1:vps) {
+    S[j,,i] <- V[SVI[j,i],]
+  }
+}
+
+# construct a mvmesh object using computed quantities
+a <- list(type="mvmeshFromSVI",mvmesh.type=-1,n=n,m=vps-1,vps=vps,S=S,V=V,SVI=SVI)
+class(a) <- "mvmesh"
+return(a) }
+########################################################################
+mvmeshFromSimplices <- function( S ) {
+# construct an mvmesh object from an array of simplices in S
+
+# if a single simplex, convert to an array
+if (is.matrix(S)) { S <- array(S,dim=c(dim(S),1) ) }
+stopifnot( is.array(S), length(dim(S))==3 )
+
+# find unique vertices
+dimS <- dim(S)
+vps <- dimS[1]
+n <- dimS[2]
+nS <- dimS[3]
+
+# get unique rows of S
+V <- uniqueRowsFromDoubleArray( S )
+
+# construct SVI matrix from V and S
+SVI <- matrix( 0L, nrow=vps, ncol=nS)
+for (i in 1:nrow(V)) {
+  for (j in 1:nS) {
+    k <- MatchRow( V[i,], S[,,j])
+    if (length(k) > 0) {
+      SVI[k,j] <- i
+    } 
+  }
+}
+
+k <- which(SVI==0)
+if( length(k) > 0 ) warning(paste(length(k),"unmatched rows in function mvmeshFromSimplices"))
+
+# construct a mvmesh object using computed quantities
+a <- list(type="mvmeshFromSimplices",mvmesh.type=-1,n=n,m=vps-1,vps=vps,S=S,V=V,SVI=SVI)
+class(a) <- "mvmesh"
+return(a)}
+########################################################################
+uniqueRowsFromDoubleArray <- function( A ) {
+# find unique rows of an array A of type double using the MatchRow function,
+# which is based on built-in function identical( )
+
+# treat a matrix as an array with 3rd dimension=1
+if( is.matrix(A) ) { A <- array( A, dim=c(dim(A),1) ) }
+stopifnot( is.array(A), length(dim(A))==3, all(dim(A)>0) )
+
+nA <- dim(A)[3]
+B <- matrix( 0, ncol=ncol(A), nrow=nrow(A)*nA )
+B[1,] <- A[1,,1]
+count <- 1
+for (i in 1:nA) {
+  for (j in 1:nrow(A)) {
+    match <- MatchRow( A[j,,i], B, first=1, last=count )
+    if (length(match)==0) { 
+      count <- count + 1 
+      B[count,] <- A[j,,i]
+    }
+  }
+}
+return(B[1:count, ]) }
+########################################################################
+mvmeshFromVertices <- function( V ) {
+# construct an mvmesh object from a matrix of vertices; the constructed
+# simplices are ALWAYS of dimension n=ncol(V) because delaunayn will return n-dim. simplices.
+# So this will NOT work with simplices of dimension m < n, i.e. spheres or 
+# lower dim. simplices.  Even when the simplices are of dimension n, you may get a 
+# different tessellation than you were expecting: vertices can be grouped in multiple ways.
+
+# tesselate
+SVI <- t( delaunayn( V ) )
+
+# define sizes
+n <- ncol(V)
+nV <- nrow(V)
+vps <- nrow(SVI)
+
+# construct list of simplices
+S <- array( 0.0, dim=c(vps,n,ncol(SVI)))
+for (i in 1:ncol(SVI)) {
+  for (j in 1:n) {
+    S[j,,i] <- V[SVI[j,i],]
+  }
+}
+
+# construct a mvmesh object using computed quantities
+a <- list(type="mvmeshFromVertices",mvmesh.type=-1,n=n,m=n,vps=vps,S=S,V=V,SVI=SVI)
+class(a) <- "mvmesh"
+return(a)}
+######################################################################
+rtessellation <- function( n, S, weights=rep(1,dim(S)[3]) ) {
+# simulate n random vectors from a tessellation
+# S is a (vps x d x nS) array of simplices
+# weights is a vector of weights
+
+# special case of one simplex
+if( is.matrix(S) ) { S <- array(S,dim=c(dim(S),1)) }
+
+stopifnot( n > 0, is.array(S), length(dim(S))==3, dim(S)[3]==length(weights))
+dimS <- dim(S)
+vps <- dimS[1]; d <- dimS[2];  nS <- dimS[3]
+
+# generate u uniform on the unit simplex
+u <- matrix( rexp( n*vps),nrow=vps,ncol=n )
+u.sum <- colSums(u)
+for (i in 1:n) { u[,i] <- u[,i]/u.sum[i] }
+
+x <- matrix( 0.0, nrow=n, ncol=d )
+which.splx <- sample.int( n=nS, size=n, replace=TRUE, prob=weights )
+for (i in 1:n) {
+  j <- which.splx[i]
+  x[i,] <- u[,i] %*% S[,,j]
+}
+return(x) }
+######################################################################
+mvmeshCombine <- function( mesh1, mesh2 ) {
+# combine 2 meshes, retain type of mesh1
+
+stopifnot( mesh1$n == mesh2$n, mesh1$m==mesh2$m, mesh1$vps==mesh2$vps )
+new <- mesh1
+new$V <- rbind(mesh1$V,mesh2$V)
+new$SVI <- cbind(mesh1$SVI,mesh2$SVI)
+new$S <- abind( mesh1$S, mesh2$S )
+return(new) }
+######################################################################

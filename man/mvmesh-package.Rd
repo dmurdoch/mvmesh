@@ -8,8 +8,8 @@ Euclidean space. Multivariate histograms based on these meshes are provided.}
 \tabular{ll}{
 Package: \tab mvmesh\cr
 Type: \tab Package\cr
-Version: \tab 1.1\cr
-Date: \tab 2015-08-20\cr
+Version: \tab 1.2\cr
+Date: \tab 2016-01-05\cr
 License: \tab GPL (>= 3) \cr
 }
 A range of multivariate problems require working with simplices, spheres, balls, 
@@ -48,10 +48,12 @@ Research Development and Engineering Command.
 
 Version history: 
 \itemize{
-\item 1.0 (2015-03-01) original package
-\item 1.1 (2015-08-20) added functions \code{histDirectionalQuantileThreshold}, \cr
+\item 1.0 original package
+\item 1.1 added functions \code{histDirectionalQuantileThreshold}, \cr
   \code{histDirectionalAbsoluteeThreshold}, \code{HollowTube}, \code{SolidTube}, \code{Lift2UnitSimplex}, \cr
- \code{IntersectMultipleSimplicesV}, \code{IntersectMultipleSimplicesH}, \code{Intersect2SimplicesH}.
+ \code{IntersectMultipleSimplicesV}, \code{IntersectMultipleSimplicesH}, \code{Intersect2SimplicesH} \cr
+\item 1.2 added new functions \code{mvmeshFromSVI}, \code{mvmeshfromSimplices}, \code{mvmeshFromVertices}, \code{rtesselation},
+   new argument normalize.by.area in \code{histDirectional}, new argument label.octants in \code{histDirectional}.  Speed up 3d plots. 
 }
 }
 
@@ -71,7 +73,7 @@ The simplex is the convex hull of the vertices. Note: vps stands for 'vertices p
 }
 
 Both of these descriptions have their uses, so the core functions in this package calculate
-both.  Most geometric objects described be a list of simplices.  To store all the relevant
+both.   To store all the relevant
 information needed, the basic functions in this package return an object of class mvmesh.  
 An object of class mvmesh has the following fields, extending the definitions
 above from a single simplex to a list of simplices:
@@ -119,11 +121,12 @@ double precision numbers.  This is convenient, but has potential problems.
 For example, determining whether points lie on a line or in a plane or on a sphere may
 not be possible with floating point arithmetic because coordinates can't be
 represented exactly.  The computational geometry package rcdd on CRAN
-gives a way around this by using exact rational arithmetic.  This works
-fine for points on a linear space, but not for points on
-the unit sphere: (sqrt(2)/2,sqrt(2)/2) is on the unit circle, but
-cannot be represented exactly as a rational number.  So, we 
-use floating point numbers everywhere.  When required package \code{rcdd} is loaded,
+gives a way around this by using exact rational arithmetic.  Using rational arithemetic works
+fine when points can be expressed as rational numbers, but not for points shifted by an irrational
+number or on more general surfaces, e.g. (sqrt(2)/2,sqrt(2)/2) is on the unit circle, but
+cannot be represented exactly as a rational number.  Since we want to work in more
+situations, we use floating point numbers everywhere, accepting the fact that points may not
+be represented exactly.  When the required package \code{rcdd} is loaded,
 it prints out a warning message about double precision numbers and
 encourages the use of rational arithmetic.  I do not know how to suppress this message.
 That package warns that using doubles can lead to crashes in certain circumstances.
@@ -157,7 +160,6 @@ title3d("solid ball in 3d")
 
 demo(mvmesh) # shows a range of meshes
 demo(mvhist) # shows a range of multivariate histograms
-demo(mvmesh2) # miscellaneous examples
 }
 
 }

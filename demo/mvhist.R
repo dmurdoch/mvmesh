@@ -54,6 +54,27 @@ histDirectional( x, k=2, plot.type="grayscale" )
 histDirectional( x, k=2, plot.type="index" )
 histDirectional( x, k=2, plot.type="none" )
 
+
+# compare frequence, relative freq. and normalized histograms
+n <- 20000; d <- 3; k <- 2
+x <- matrix( rnorm( n*d ), nrow=n, ncol=d )
+dev.new(); par(mfrow=c(3,1),mar=c(4,4,2,1))
+histDirectional( x, k, plot.type="index" )
+title("omnidirectional data: frequency")
+histDirectional( x, k, freq=FALSE, plot.type="index" )
+title("omnidirectional data: relative frequency")
+histDirectional( x, k, plot.type="index", normalize.by.area=TRUE )
+title("omnidirectional data: frequency/surface.area")
+
+# first octant only
+dev.new(); par(mfrow=c(3,1),mar=c(4,4,2,1))
+histDirectional( abs(x), k, positive.only=TRUE, plot.type="index" )
+title("positive data: frequency")
+histDirectional( abs(x), k, positive.only=TRUE, freq=FALSE, plot.type="index" )
+title("positive data: relative frequency")
+histDirectional( abs(x), k, positive.only=TRUE, plot.type="index", normalize.by.area=TRUE )
+title("positive data: frequency/surface.area")
+
 histRectangular( x, breaks=3 ) # default plot.type="pillars", stacked 
 histRectangular( x, breaks=3, plot.type="counts" ) 
 histRectangular( x, breaks=3, plot.type="index"  ) 
@@ -67,12 +88,10 @@ histSimplex( x, 4*SolidSimplex( n=3, k=3 )$S, plot.type="none"  )
 histSimplex( x, 4*UnitBall( n=3, k=2 )$S  ) # default plot.type="counts"
 histSimplex( x, 4*UnitBall( n=3, k=2 )$S, plot.type="index"  )
 
-histSimplex( x, 4*PolarBall( n=3, breaks=8 )$S ) # default plot.type="counts"
-histSimplex( x, 4*PolarBall( n=3, breaks=8 )$S, plot.type="index" )
-
 # higher dimensional data
 d <- 5; n <- 10000
 x <- matrix( rnorm(d*n), nrow=n, ncol=d )
 histDirectional( x, k=1 )
+histDirectional( x, k=1, normalize.by.area=TRUE )
 histRectangular( x, breaks=2 )
 

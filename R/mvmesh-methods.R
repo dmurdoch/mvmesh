@@ -33,7 +33,7 @@ if (n==2) {
     # initialize the plot region to show all points
     r1 <- range(as.double(x$S[,1,]))
     r2 <- range(as.double(x$S[,2,]))
-    plot( r1, r2, xlab="", ylab="", type="n")  
+    plot( r1, r2, xlab="", ylab="", type="n",...)  
   }
   if (show.points) {
     points( x$V[,1], x$V[,2] , ... )
@@ -42,9 +42,11 @@ if (n==2) {
     DrawSimplex2d( x$S[,,k], label.values[k], show.labels, x$mvmesh.type, show.edges, show.faces, ...)
   }
 } else { # n==3
-  if (new.plot) {
+   if (new.plot) {
     open3d( )
   }  
+  old.par <- par3d( skipRedraw=TRUE ) # speed up plot
+  on.exit( par3d( old.par ) ) # restore old settings when done 
   if (show.points) {
     points3d( x$V[,1], x$V[,2], x$V[,3] , ... )
   }
@@ -57,7 +59,7 @@ if (n==2) {
 DrawSimplex2d <- function( S, label, show.labels, mvmesh.type, show.edges=TRUE, show.faces=FALSE, ...){
 #  Draw a single 2d simplex; if show.label=TRUE, add a label 'label' at the middle of the simplex
 
-if (mvmesh.type==7L) {
+if ( mvmesh.type==7L ) {
   # for a rectangular mesh, draw a rectangle; need to reorder vertices
   # warning: this reordering depends on the order in which MeshRectangular defines vertices!
   jj <- c(1,2,4,3,1) 
@@ -98,24 +100,31 @@ if (mvmesh.type==7L) {
     if (show.faces) { jj <- jj[1:4]; rgl.quads( S[jj,1], S[jj,2], S[jj,3], ... ) }
   }
 } else {
-  m <- nrow(S)  
-  if (show.edges) { 
-    for (i in 1:(m-1)) {
-      for (j in (i+1):m) {
-        lines3d(S[c(i, j),1],S[c(i, j),2],S[c(i, j),3],...) 
-      }  
-    }
-  }
-  if (show.faces) { 
-    if (nrow(S)==3) { rgl.triangles( S, ... ) } 
-    if (nrow(S)==4) { 
-      face.grouping <- matrix( c(1,2,3,  1,2,4,  1,3,4,  2,3,4), byrow=TRUE, nrow=4, ncol=3)
-      for (k in 1:4) { 
-        jj <- face.grouping[k, ]
-        rgl.triangles( S[jj,], ... ) 
+  if(mvmesh.type==9L) {
+    # polar sphere
+    jj <- c(1,2,4,3,1)
+    if (show.edges) { lines3d( S[jj,1], S[jj,2], S[jj,3], ... ) }
+    if (show.faces) { warning("show.faces does not work in this case") }
+  } else {
+    m <- nrow(S)  
+    if (show.edges) { 
+      for (i in 1:(m-1)) {
+        for (j in (i+1):m) {
+          lines3d(S[c(i, j),1],S[c(i, j),2],S[c(i, j),3],...) 
+        }  
       }
-    } 
-    if (nrow(S) > 4) { warning("show.faces does not work in this case") }         
+    }
+    if (show.faces) { 
+      if (nrow(S)==3) { rgl.triangles( S, ... ) } 
+      if (nrow(S)==4) { 
+        face.grouping <- matrix( c(1,2,3,  1,2,4,  1,3,4,  2,3,4), byrow=TRUE, nrow=4, ncol=3)
+        for (k in 1:4) { 
+          jj <- face.grouping[k, ]
+          rgl.triangles( S[jj,], ... ) 
+        }
+      } 
+      if (nrow(S) > 4) { warning("show.faces does not work in this case") }         
+    }
   }
 }
 

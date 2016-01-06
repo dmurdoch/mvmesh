@@ -41,13 +41,15 @@
 # 
 ###############################################################################
 histDirectional <- function( x, k, p=2, plot.type="default", freq=TRUE,
-                              positive.only=FALSE, report="summary", ... ) {
+                              positive.only=FALSE, report="summary", label.octants=TRUE, 
+                              normalize.by.area=FALSE, ... ) {
 # plot a directional histogram for the d-dimensional data in x
 # Written by John Nolan, 25 Oct. 2014
 # Function specific input:
 #    k is the number of subdivisions along each edge of unit simplex
 #    p is the power in the l^p norm:  |x| = (sum(abs(x)^p))^(1/p)
 #    plot.type specifies the type of plot to do
+#    freq TRUE for a frequency histogram, FALSE for a relatuve frequency histogram
 #    positive.only=TRUE for all data is positive, =FALSE for all directions
 #
 # Output: a list returned invisibly containing the tally and simplex info
@@ -56,9 +58,9 @@ histDirectional <- function( x, k, p=2, plot.type="default", freq=TRUE,
 # input checking, more checking is done in directional.tally
 k <- as.integer( k )
 allowed.types <- c("default", "index","radial","none","orthogonal","grayscale")
+allowed.report <- c("all","summary","none")
 stopifnot( k > 0, is.matrix(x), nrow(x) > 1, ncol(x) > 0,  is.logical(positive.only), is.numeric(p), length(p)==1,
-   plot.type %in% allowed.types, report %in% c("all","summary","none") ) 
-   
+   plot.type %in% allowed.types, report %in% allowed.report  ) 
 d <- ncol(x)
 if (plot.type == "default") {
   plot.type <- ifelse( d <= 3, "radial","index")
@@ -81,22 +83,49 @@ H <- HrepCones( S )
 tally <- TallyHrep( x, H, report )
 if (freq) {
   value <- tally$counts
+  ylab.string <- "frequency"
 } else {
-  value <- tally$relative.freq
+  value <- tally$rel.freq
+  ylab.string <- "relative frequency"  
+}
+
+if (normalize.by.area) {
+  for (i in 1:length(value)) {
+    value[i] <- tally$counts[i]/SimplexSurfaceArea( t(S[,,i]) )
+  }
+  ylab.string <- "frequency/area"
 }
 
 # plot the results
 if ( plot.type != "none" ) {
   ncones <- length(value)
   if (plot.type == "index") {
+    val.max <- max(value)
     cone <- 1:ncones
-    plot(cone,value,type='h',ylab="counts",...)
+    if (positive.only) {
+      n.octants <- 1
+    } else {
+      n.octants <- 2^d    
+    }
+    octant.width <- ncones/n.octants
+    plot(cone,value,type='h',ylab=ylab.string,ylim=c(0,val.max), ...)
+    if (label.octants) {
+      plus.minus <- c("+","-")
+      for (i in 1:n.octants) {
+        y <- ConvertBase(i-1,2,d)
+        signs <- (-1)^y
+        label <- paste( plus.minus[y+1],collapse="")
+        x.center <- (i-1/2)*octant.width
+        text( x.center,val.max, label )
+        abline(v=i*octant.width+1/2,col='red',lty=2)
+      }
+    }
   } else {
     scale <- max(value)  
     if (plot.type=="radial") {  
       if (d==2) {
         # set plot window
-        plot( 2*range(S[,1,]), 2*range(S[,2,]), type='n',xlab="",ylab="") 
+        plot( 2*range(S[,1,]), 2*range(S[,2,]), type='n',xlab="",ylab=ylab.string) 
         for (j in 1:ncones) {
           DrawSimplex2d( S[,,j], label=j, show.labels=FALSE, mvmesh.type=sphere$mvmesh.type, ... )
           mid <- colMeans( S[,,j] )
@@ -163,7 +192,7 @@ if ( plot.type != "none" ) {
   }
 }
 
-invisible( list(counts=tally$counts, nrejects=tally$nrejects, nties=tally$nties,
+invisible( list(counts=tally$counts, nrejects=tally$nrejects, value=value, nties=tally$nties,
            nx=tally$nx, rel.freq=tally$rel.freq, rel.rejects=tally$rel.rejects, mesh=sphere,
            k=k,plot.type=plot.type,positive.only=positive.only,report=report)) }
 ###############################################################################
@@ -203,10 +232,13 @@ H <- V2Hrep( rect$S )
 tally <- TallyHrep( x, H, report=report )
 if (freq) {
   value <- tally$counts
+  ylab.string <- "frequency"  
 } else {
   value <- tally$relative.freq
+  ylab.string <- "relative frequency"   
 }
 
+   
 # plot results
 if ( plot.type=="counts" ) {
   plot( rect, show.labels=TRUE, label.values=value, ... )
@@ -234,7 +266,7 @@ if (plot.type=="pillars") {
 }
 if (plot.type=="index") {
   index <- 1:length(value)
-  plot(index,value,type='h',ylab="counts",...)
+  plot(index,value,type='h',ylab=ylab.string,...)
 }   
 
 invisible( list(counts=tally$counts, nrejects=tally$nrejects, nties=tally$nties,
@@ -264,8 +296,10 @@ H <- V2Hrep( S )
 tally <- TallyHrep( x, H , report=report )
 if (freq) {
   value <- tally$counts
+  ylab.string <- "frequency"   
 } else {
   value <- tally$relative.freq
+  ylab.string <- "relative frequency" 
 }
 
 # construct "fake" mesh for caller; this is only used internally
@@ -284,7 +318,7 @@ if (plot.type=="pillars") {
 } 
 if (plot.type=="index") {
   index <- 1:length(value)
-  plot(index,value,type='h',ylab="counts",...)
+  plot(index,value,type='h',ylab=ylab.string,...)
 }   
 
 invisible( list(counts=tally$counts, nrejects=tally$nrejects, nties=tally$nties,
