@@ -5,7 +5,8 @@ plot( UnitSimplex( n=2, k=4 ), show.points=TRUE )
 plot( SolidSimplex( n=2, k=4 ), col="cyan", show.faces=TRUE )
 plot( UnitSphere( n=2, k=2 ), show.points=TRUE )
 plot( UnitBall( n=2, k=2 ), show.faces=TRUE, col="green" )
-plot( RectangularMesh( a=c(1,3), b=c(2,10), breaks=c(5,8) ) )
+plot( SolidRectangle( a=c(1,3), b=c(2,10), breaks=c(5,8) ) )
+plot( HollowRectangle( a=c(1,3), b=c(2,10), breaks=c(5,8) ) )
 plot( PolarSphere( n=2), col="blue" )
 plot( PolarBall( n=2 ), show.labels=TRUE )
 
@@ -21,9 +22,13 @@ plot(mesh3, new.plot=FALSE, col="green", show.faces=TRUE )
 
 
 # different ways to specify subdivision of a rectangular mesh
-plot( RectangularMesh( a=c(1,3), b=c(2,7) ) )
-plot( RectangularMesh( a=c(1,3), b=c(2,7), breaks=c(4,10) ) )
-plot( RectangularMesh( a=c(1,3), b=c(2,7), 
+plot( SolidRectangle( a=c(1,3), b=c(2,7) ) )
+plot( SolidRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) ) )
+plot( SolidRectangle( a=c(1,3), b=c(2,7), 
+    breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) ) )
+plot( HollowRectangle( a=c(1,3), b=c(2,7) ) )
+plot( HollowRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) ) )
+plot( HollowRectangle( a=c(1,3), b=c(2,7), 
     breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) ) )
 
 
@@ -40,8 +45,11 @@ plot( UnitSphere( n=3, k=2 ), col="blue", show.faces=TRUE )
 plot( UnitBall( n=3, k=2 ), col="green" )
 plot( UnitBall( n=3, k=2 ), col="green", show.faces=TRUE, alpha=0.5 )
 
-plot( RectangularMesh( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red" )
-plot( RectangularMesh( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red", show.faces=TRUE, alpha=0.5 )
+plot( SolidRectangle( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red" )
+plot( SolidRectangle( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red", show.faces=TRUE, alpha=0.5 )
+
+plot( HollowRectangle( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red" )
+plot( HollowRectangle( a=c(1,3,0), b=c(2,5,2), breaks=c(2,3,4) ), show.labels=TRUE, col="red", show.faces=TRUE, alpha=0.5 )
 
 plot( PolarSphere( n=3 ), col="blue")
 plot( PolarSphere( n=3 ), col="blue",show.faces=TRUE )

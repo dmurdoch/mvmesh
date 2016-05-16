@@ -227,7 +227,7 @@ for (j in 1:d) {
 }
 
 # define rectangular bins, convert to H-rep and tally
-rect <- RectangularMesh( a, b, breaks=breaks,  )
+rect <- SolidRectangle( a, b, breaks=breaks,  )
 H <- V2Hrep( rect$S )
 tally <- TallyHrep( x, H, report=report )
 if (freq) {
@@ -353,7 +353,7 @@ for (i in 1:nbins) {
       # x[j] has already been counted in some cone with index < i
       nties <- nties + 1L          
       if (report=="all") { 
-        warning( paste("data vector ",j,"is in multiple cones") )
+        warning( paste("data vector ",j,"is in multiple simplices") )
       }
     } 
     x.counts[j] <- x.counts[j]+1L

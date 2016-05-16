@@ -38,7 +38,7 @@ simplex on the sphere.  This is useful since in general the surface area varies 
 accordingly.  In particular, isotropic data will not appear isotropic without setting this to TRUE.
 If TRUE, the value of freq is ignored: the histogram always shows count/surface area
 } 
-  \item{breaks}{specifes the subdivision of the region; see 'breaks' in \code{\link{RectangularMesh}}
+  \item{breaks}{specifes the subdivision of the region; see 'breaks' in \code{\link{SolidRectangle}}
 }
   \item{plot.type}{type of plot, see details below
 }
@@ -88,7 +88,7 @@ description computed using the H-representation by \code{TallyHrep}.
    works for \code{histRectangular}
 \item "counts" - shows frequency counts as a number in the center of each simplex
 \item "radial" - \code{histDirectional} only, shows radial spikes proportional to the counts 
-\item "grayscale" - \code{histDirectional} only, shows radial spikes proportional to the counts 
+\item "grayscale" - \code{histDirectional} only, color codes simplices proportional to the counts 
 \item "orthogonal" - \code{histDirectional} only, shows radial spikes proportional to the counts 
 \item "default" - type depends on the dimension of the data and type of histogram
 }

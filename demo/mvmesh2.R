@@ -5,7 +5,9 @@ UnitSphere( n=3, k=4, method="edgewise" )
 UnitSphere( n=3, k=2, method="dyadic" )
 UnitBall( n=3, k=3, method="edgewise" )
 UnitBall( n=3, k=2, method="dyadic" )
-RectangularMesh( a=c(1,3), b=c(2,10) )
+SolidRectangle( a=c(1,3), b=c(2,10) )
+HollowRectangle( a=c(1,3), b=c(2,10) )
+Icosahedron( )
 
 # edge subdivision
 T <- EdgeSubdivision( n=2, k=2 )
@@ -19,7 +21,7 @@ SimplexCoord( S, T[,,1] )
 SVIFromColor( S, T )
 
 # check all meshes in different dimensions
-for (n in 2:3) {
+for (n in 2:4) {
   cat("dimension n=",n," ... ")
   timer <- system.time({
   UnitSimplex( n=n, k=4 )
@@ -28,6 +30,7 @@ for (n in 2:3) {
   UnitSphere( n=n, k=2, method="dyadic" )
   UnitBall( n=n, k=3, method="edgewise" )
   UnitBall( n=n, k=2, method="dyadic" )
-  RectangularMesh( a=rep(0.0,n), b=rep(1.0,n) ) })
-  cat(timer,"\n")
+  SolidRectangle( a=rep(0.0,n), b=rep(1.0,n) ) 
+  HollowRectangle( a=rep(0.0,n), b=rep(1.0,n) ) })
+  cat(timer[1:3],"\n")
 }

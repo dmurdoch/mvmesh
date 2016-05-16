@@ -3,7 +3,6 @@
 \alias{mvmeshFromSimplices}
 \alias{mvmeshFromSVI}
 \alias{mvmeshFromVertices}
-\alias{rtessellation}
 \alias{mvmeshCombine}
 \alias{uniqueRowsFromDoubleArray}
 
@@ -12,10 +11,9 @@
 \description{Utilities for working with mvmesh objects}
 \usage{
 mvmeshFromSimplices(  S )
-mvmeshFromSVI(  V, SVI )
+mvmeshFromSVI(  V, SVI, m )
 mvmeshFromVertices( V )
 mvmeshCombine( mesh1, mesh2 )
-rtessellation( n, S, weights=rep(1,dim(S)[3]) )
 uniqueRowsFromDoubleArray( A )
 }
 %- maybe also 'usage' for other objects documented here.
@@ -26,11 +24,9 @@ uniqueRowsFromDoubleArray( A )
 }
   \item{SVI}{integer (vps x nS) matrix which specifies the indices of the vertices that make up the simplices in S
 }
-  \item{mesh1, mesh2}{objects of class "mvmesh"
+  \item{m}{integer dimension of the mesh, less than or equal n=dimension of the space
 }
-  \item{n}{number of vectors to simulate
-}
-  \item{weights}{weights used for simulation
+  \item{ mesh1, mesh2}{objects of class "mvmesh"
 }
   \item{A}{a matrix of doubles
 }
@@ -38,8 +34,8 @@ uniqueRowsFromDoubleArray( A )
 \details{Experimental functions. They allow one to build mvmesh objects manually 
 by specifying just simplices (\code{mvmeshFromSimplices}), 
 or just vertices (\code{mvmeshFromVertices}), or vertices and grouping information (\code{mvmeshFromSVI}).
-\code{mvmeshCombines} combines two meshes.  The resulting objects can usually be plotted directly.
-\code{rtessellation} allows you to sample from an mvmesh object.
+\code{mvmeshCombines} combines two meshes with the same values of n, m and vps.  The resulting objects can usually be plotted by the plot method, 
+but other operations may fail.  In particular, vertices common to both meshes will be repeated.
 }
 \value{undocumented
 }

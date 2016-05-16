@@ -2,13 +2,13 @@ mesh1 <- SolidSimplex( n=2, k=5 )
 print(str(mesh1))
 mesh2 <- mvmeshFromSimplices(  mesh1$S )
 print(str(mesh2))
-mesh3 <-mvmeshFromSVI(  mesh1$V, mesh1$SVI )
+mesh3 <- mvmeshFromSVI(  mesh1$V, mesh1$SVI, mesh1$m )
 print(str(mesh3))
 mesh4 <-mvmeshFromVertices( mesh1$V )
 print(str(mesh4))
 
 # sample uniformly from the simplex
-x <- rtessellation( n=1000, mesh1$S )
+x <- rmvmesh( n=1000, mesh1 )
 plot(mesh1)
 points( x )
 
@@ -22,10 +22,10 @@ z <- sin(3*t)
 V <- cbind( x,y,z)
 SVI <- rbind( 1:length(t), 2:(length(t)+1) )
 SVI[2,length(t)] <- 1  # join end to start
-trefoil <- mvmeshFromSVI( V, SVI )
+trefoil <- mvmeshFromSVI( V, SVI, 1 )
 plot(trefoil, col="blue")
 # sample randomly from the path
-x <- rtessellation( 100, trefoil$S )
+x <- rmvmesh( 100, trefoil )
 points3d( x, col='red', size=5 )
 title3d( "trefoil knot" )
 
@@ -40,7 +40,7 @@ SVI <- matrix( 0L, nrow=2, ncol=0)
 for (i in 1:length(connect)) {
   if(connect[i]) { SVI <- cbind( SVI, c(i,i+1) ) }
 }
-return( mvmeshFromSVI( V, SVI ) ) }
+return( mvmeshFromSVI( V, SVI, 1 ) ) }
 ###############################################################
 weights.by.length <- function( path ){
 
@@ -114,7 +114,7 @@ word <- mvmeshCombine( word, AffineTransform(number.5,I,c(4.4,-2,-.5)) )
 plot(word )
 
 # sample from the tessellation
-x <- rtessellation( n=400, word$S,  weights.by.length( word ) )
+x <- rmvmesh( n=400, word,  weights.by.length( word ) )
 points3d( x, col='purple', size=5 )
 title3d("sampling from text")
 

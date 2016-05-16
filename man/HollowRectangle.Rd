@@ -1,5 +1,7 @@
-\name{RectangularMesh}
-\alias{RectangularMesh}
+\name{HollowRectangle}
+\alias{HollowRectangle}
+\alias{SolidRectangle}
+\alias{mvmeshRectBreaks}
 \alias{NextMultiIndex}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Subdivide a hyperrectangle with a standard grid
@@ -9,7 +11,9 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-RectangularMesh( a, b, breaks=5, silent=FALSE )
+HollowRectangle( a, b, breaks=5, silent=FALSE )
+SolidRectangle( a, b, breaks=5, silent=FALSE )
+mvmeshRectBreaks( a, b, breaks, silent ) 
 NextMultiIndex( i, n )
 }
 %- maybe also 'usage' for other objects documented here.
@@ -51,19 +55,31 @@ bins do not cover the rectangle given by 'a' and 'b').
 \value{An object of class "mvmesh"  as described in \code{\link{mvmesh}}.
 }
 \examples{
-RectangularMesh( a=c(1,3), b=c(2,7), breaks=2 )
-RectangularMesh( a=c(1,3), b=c(2,7), breaks=c(4,10) )
-RectangularMesh( a=c(1,3), b=c(2,7), 
+SolidRectangle( a=c(1,3), b=c(2,7), breaks=2 )
+SolidRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) )
+SolidRectangle( a=c(1,3), b=c(2,7), 
     breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) )
+HollowRectangle( a=c(1,3), b=c(2,7), breaks=2 )
+HollowRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) )
+HollowRectangle( a=c(1,3), b=c(2,7), 
+    breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) )
+    
 
 \dontrun{
-plot( RectangularMesh( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE )
-plot( RectangularMesh( a=c(1,3), b=c(2,7), breaks=c(4,10) ), show.labels=TRUE )
-plot( RectangularMesh( a=c(1,3), b=c(2,7), 
+plot( SolidRectangle( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE )
+plot( SolidRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) ), show.labels=TRUE )
+plot( SolidRectangle( a=c(1,3), b=c(2,7), 
     breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) ), show.labels=TRUE )
-plot( RectangularMesh( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE, 
+plot( SolidRectangle( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE, 
     label.values=letters[1:9], col='green' )
-plot( RectangularMesh( a=c(1,3,0), b=c(6,7,6), breaks=3 ), show.labels=TRUE, col='blue')
+    
+plot( HollowRectangle( a=c(1,3,0), b=c(6,7,6), breaks=3 ), show.labels=TRUE, col='blue')
+plot( HollowRectangle( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE )
+plot( HollowRectangle( a=c(1,3), b=c(2,7), breaks=c(4,10) ), show.labels=TRUE )
+plot( HollowRectangle( a=c(1,3), b=c(2,7), 
+    breaks=list( seq(1,3,by=0.25), seq(2,7,by=1) ) ), show.labels=TRUE )
+plot( HollowRectangle( a=c(1,3), b=c(2,7), breaks=3 ), show.labels=TRUE, 
+    label.values=letters[1:9], col='green' )
 }    
 }
 

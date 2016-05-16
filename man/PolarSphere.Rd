@@ -23,7 +23,7 @@ Polar2Rectangular( r, theta )
   \item{n}{Dimension of the space; the Polar sphere is an (n-1) dimensional manifold
 }
   \item{breaks}{specification of the partition of in the angle space theta.  See the definition of
-  'breaks' in \code{\link{RectangularMesh}}.
+  'breaks' in \code{\link{SolidRectangle}}.
 }
   \item{p}{Power used in the l^p norm; p=2 is the Euclidean norm
 }

@@ -281,7 +281,7 @@ PolarSphere <- function( n, breaks=c(rep(4,n-2),8), p=2, positive.only=FALSE ) {
 n <- as.integer( n )
 stopifnot( n >= 2 )
 # calculate rectangular mesh on angle space
-rect.mesh <- RectangularMesh( a=rep(0.0,n-1), b=c(rep(pi,n-2),2*pi), breaks=breaks)
+rect.mesh <- SolidRectangle( a=rep(0.0,n-1), b=c(rep(pi,n-2),2*pi), breaks=breaks)
 
 # use polar coordinate transformation to find mesh on sphere
 nV <- nrow(rect.mesh$V)
@@ -331,9 +331,62 @@ mesh <- list(type="PolarBall",mvmesh.type=10L,
           breaks=breaks,p=p,positive.only=positive.only)
 class(mesh) <- "mvmesh"
 return(mesh) }
+######################################################################
+rmvmesh <- function( n, mesh, weights=rep(1,ncol(mesh$SVI)) ) {
+# simulate n values from a mesh, replaces earlier function rtessellation, which did
+# not work in all cases.  (This doesn't yet work in all cases, but at least
+# it gives an error message in the cases when it doesn't work.)
+# n=number of values to simulate
+# mesh= an mvmesh object
+# weights= a vector of weights
+
+stopifnot( n >= 1, class(mesh)=="mvmesh", length(weights)==ncol(mesh$SVI) )
+
+# not the most efficient, but simplest way to simulate...
+dimS <- dim(mesh$S)
+vps <- mesh$vps; d <- mesh$n;  nS <- dimS[3]
+x <- matrix( 0.0, nrow=n, ncol=d )
+which.splx <- sample.int( n=nS, size=n, replace=TRUE, prob=weights )
+      
+# simplest case: standard simplices
+if ( mesh$m+1  == mesh$vps ) {
+  # generate u uniform on the unit simplex
+  u <- matrix( rexp( n*vps),nrow=vps,ncol=n )
+  u.sum <- colSums(u)
+  for (i in 1:n) { u[,i] <- u[,i]/u.sum[i] }
+  
+  # translate to respective simplex
+  for (i in 1:n) {
+    j <- which.splx[i]
+    x[i,] <- u[,i] %*% mesh$S[,,j]
+  }
+  return(x) 
+}
+
+# retangular regions
+a <- rep(0.0,d); b <- a
+if ( mesh$type %in% c("SolidRectangle","HollowRectangle") ) {
+  # generate u uniform on appropriate rectangle
+  u <- matrix( runif( n*d ), nrow=n  ,ncol=d )
+  for (i in 1:n) {
+    j <- which.splx[i]
+    for (k in 1:d) {
+      a[k] <- min( mesh$S[,k,j] )
+      b[k] <- max( mesh$S[,k,j] )
+    }
+    x[i,] <- a + u[i, ]*(b-a)
+  }
+  return(x) 
+}
+
+# this doesn't work in all cases, but causes an error for those cases where it does not work
+# not implemented "PolarSphere","PolarBall","HollowTube","SolidTube"
+stop( "Cannot currently simulate from a mesh of type ", mesh$type )
+}
 #####################################################################
-RectangularMesh <- function( a, b, breaks=5, silent=FALSE ) {
-# Generate a mesh on the hyperrectangle [a,b]
+SolidRectangle <- function( a, b, breaks=5, silent=FALSE ) {
+# Generate a mesh on the hyperrectangle [a,b], previously called RectangularMesh( )
+#
 # breaks  specifies the bin boundaries in each coordinate, one of:
 #  - a vector of length d, which specifies the number of bins in each dimension. Then
 #    the bin boundaries in coordinate j are given by seq(min(x[,j]),max(x[,j]),length=breaks[j])
@@ -347,10 +400,59 @@ RectangularMesh <- function( a, b, breaks=5, silent=FALSE ) {
 #
 # Output is a list of class "mvmesh"
 #
+
+# check input and convert various forms of breaks to the list form
+breaks <- mvmeshRectBreaks( a, b, breaks, silent )
+
+# Now construct the mesh
+# number of dividing points in each coordinate
+n <- length(a)
+ngrid <- as.integer(sapply(breaks,length)) # as.integer( ) strips off names
+
+# number of bins in each coordinate
+nbins <- ngrid - 1L
+
+# compute the vertices/grid points
+nV <- prod(ngrid)
+V <- matrix( 0.0, ncol=n, nrow=nV )
+i <- rep(1L,n)
+j <- 1L
+while (i[1] > 0) {
+  for (k in 1:n) { V[j,k] <- breaks[[k]][i[k]] }
+  j <- j + 1L
+  i <- NextMultiIndex(i,ngrid)
+}
+
+# compute the simplices
+nS <- prod(nbins)
+vps <- as.integer(2^n) # number of vertices per simplex (hyperrectangle)
+S <- array( 0.0, dim=c(vps,n,nS) )
+SVI <- matrix( 0L, nrow=vps, ncol=nS )
+i <- rep(1L,n)
+j <- 1L
+while (i[1] > 0) {
+  for (k in 1:vps) {
+    m <- ConvertBase( k-1L, 2L, n )
+    for (l in 1:n) {
+      S[k,l,j] <- breaks[[l]][i[l]+m[l]]
+    }
+    SVI[k,j] <- MatchRow( S[k,,j], V )
+  }
+  i <- NextMultiIndex(i,nbins)
+  j <- j + 1L
+}
+
+mesh <- list(type="SolidRectangle",mvmesh.type=7L,n=n,m=n,vps=as.integer(2^n),S=S,V=V,SVI=SVI,
+     a=a,b=b,breaks=breaks)
+class(mesh) <- "mvmesh"
+return(mesh) }
+#####################################################################
+mvmeshRectBreaks <- function(a,b,breaks,silent ) {
+# internal function to generate breaks for a rectangular grid
+
 stopifnot( is.numeric(a), is.numeric(b), is.vector(a), is.vector(b), 
            length(a)==length(b), length(a) >= 1, all(a < b) )
 n <- length(a)
-orig.breaks <- breaks
 
 # if breaks is a numeric vector, construct a list with the full set of dividing points
 if ( is.numeric(breaks) & is.vector(breaks) ) {
@@ -387,45 +489,63 @@ if( !silent ) {
   }
 }
 
-# Now construct the mesh
-# number of dividing points in each coordinate
-ngrid <- as.integer(sapply(breaks,length)) # as.integer( ) strips off names
-# number of bins in each coordinate
-nbins <- ngrid - 1L
+return( breaks ) }
+#####################################################################
+HollowRectangle <- function( a, b, breaks=5, silent=FALSE ) {
+# Generate a mesh on the boundary of the hyperrectangle [a,b]
+# Arguments are the same as SolidRectangle( )
+# Value is an object of class "mvmesh"
 
-# compute the vertices/grid points
-nV <- prod(ngrid)
-V <- matrix( 0.0, ncol=n, nrow=nV )
-i <- rep(1L,n)
-j <- 1L
-while (i[1] > 0) {
-  for (l in 1:n) { V[j,l] <- breaks[[l]][i[l]] }
-  j <- j + 1L
-  i <- NextMultiIndex(i,ngrid)
-}
+# check input, compute breaks for all n components
+n <- length(a)
+allBreaks <- mvmeshRectBreaks( a, b, breaks, silent )
+# bnd[ ,i] <- range( allBreaks[i] )
+bnd <- sapply(allBreaks,range)
 
-# compute the simplices
-nS <- prod(nbins)
-vps <- as.integer(2^n) # number of vertices per simplex (hyperrectangle)
-S <- array( 0.0, dim=c(vps,n,nS) )
-SVI <- matrix( 0L, nrow=vps, ncol=nS )
-i <- rep(1L,n)
-j <- 1L
-while (i[1] > 0) {
-  for (k in 1:vps) {
-    m <- ConvertBase( k-1L, 2L, n )
-    for (l in 1:n) {
-      S[k,l,j] <- breaks[[l]][i[l]+m[l]]
-    }
-    SVI[k,j] <- MatchRow( S[k,,j], V )
+# construct all sides of the rectangle
+for (i in 1:n) {
+  side <- SolidRectangle( a[-i], b[-i], allBreaks[-i] )  # n-1 dimensional face
+  nVside <- nrow(side$V)
+  nSVIside <- ncol(side$SVI)
+  if (i==1) {  # initial side
+    V <- rbind( cbind(rep(bnd[1,1],nVside),side$V), cbind( rep(bnd[2,1],nVside),side$V) )
+    SVI <- cbind( side$SVI, side$SVI+nVside)
+    nV0 <- nrow(V)  # save for below where duplicates are eliminated
+  } else {   # additional side
+    nV <- nrow(V)
+    left <- side$V[,1:(i-1),drop=FALSE]
+    if( i < n) {
+      right <- side$V[,i:ncol(side$V),drop=FALSE]
+    } else {
+      right <- matrix(0.0,nrow=nVside,ncol=0)
+    }  
+    newV <- rbind( cbind(left, rep(bnd[1,i],nVside), right), cbind(left, rep(bnd[2,i],nVside), right) )
+    V <- rbind(V,newV)
+    SVI <- cbind(SVI,side$SVI+nV,side$SVI+nV+nVside)
   }
-  i <- NextMultiIndex(i,nbins)
-  j <- j + 1L
+}
+   
+# eliminate duplicate V's
+nVnew <- nV0
+for (j in (nV0+1):nrow(V)) {
+  k <-  MatchRow( V[j,],V,1,nVnew )
+  if (length(k) == 1) { 
+    # found a match, eliminate this vertex and adjust pointers in SVI matrix
+    change <- which( SVI == j )
+    SVI[change] <- k   
+  } else {
+    nVnew <- nVnew + 1
+    V[nVnew,] <- V[j, ]
+    change <- which( SVI == j )
+    SVI[change] <- nVnew    
+  }
 }
 
-mesh <- list(type="RectangularMesh",mvmesh.type=7L,n=n,m=n,vps=as.integer(2^n),S=S,V=V,SVI=SVI,
-     a=a,b=b,breaks=breaks)
-class(mesh) <- "mvmesh"
+# build the mvmesh object
+mesh <- mvmeshFromSVI( V[1:nVnew, ] , SVI, n-1 )
+mesh$type <- "HollowRectangle"
+mesh$mvmesh.type=13L
+mesh$breaks <- allBreaks
 return(mesh) }
 #####################################################################
 HollowTube <- function( n, k.x=1, k.circumference=2, method="dyadic", p=2 ){
@@ -831,7 +951,7 @@ S <- array( 0.0, dim=c(3,3,20))
 for (k in 1:20) {
   S[ ,,k] <- V[ SVI[,k],  ]
 }
-mesh <- list( type="Icosahedron", mvmesh.type=8L, n=3L,k=NA, originalS=S, S=S, V=V, SVI=SVI )
+mesh <- list( type="Icosahedron", mvmesh.type=8L, n=3L,m=2,vps=3,k=NA, originalS=S, S=S, V=V, SVI=SVI )
 class(mesh) <- "mvmesh"
 return( mesh ) }
 #####################################################################
@@ -1132,7 +1252,7 @@ return(S2) }
 #for (i in 1:dimB[3]) {  C[,,i] <- t(B[,,i]) }
 #return(C) }
 ########################################################################
-mvmeshFromSVI <- function( V, SVI ) {
+mvmeshFromSVI <- function( V, SVI, m ) {
 # construct an mvmesh object from a tessellation: 
 #  V = nV x n matrix of vertices; V[i,] is the i-th vertex
 #  SVI = vps x nS matrix of integer indices SVI giving the grouping;
@@ -1150,7 +1270,7 @@ for (i in 1:nS) {
 }
 
 # construct a mvmesh object using computed quantities
-a <- list(type="mvmeshFromSVI",mvmesh.type=-1,n=n,m=vps-1,vps=vps,S=S,V=V,SVI=SVI)
+a <- list(type="mvmeshFromSVI",mvmesh.type=-1,n=n,m=m,vps=vps,S=S,V=V,SVI=SVI)
 class(a) <- "mvmesh"
 return(a) }
 ########################################################################
@@ -1239,31 +1359,6 @@ for (i in 1:ncol(SVI)) {
 a <- list(type="mvmeshFromVertices",mvmesh.type=-1,n=n,m=n,vps=vps,S=S,V=V,SVI=SVI)
 class(a) <- "mvmesh"
 return(a)}
-######################################################################
-rtessellation <- function( n, S, weights=rep(1,dim(S)[3]) ) {
-# simulate n random vectors from a tessellation
-# S is a (vps x d x nS) array of simplices
-# weights is a vector of weights
-
-# special case of one simplex
-if( is.matrix(S) ) { S <- array(S,dim=c(dim(S),1)) }
-
-stopifnot( n > 0, is.array(S), length(dim(S))==3, dim(S)[3]==length(weights))
-dimS <- dim(S)
-vps <- dimS[1]; d <- dimS[2];  nS <- dimS[3]
-
-# generate u uniform on the unit simplex
-u <- matrix( rexp( n*vps),nrow=vps,ncol=n )
-u.sum <- colSums(u)
-for (i in 1:n) { u[,i] <- u[,i]/u.sum[i] }
-
-x <- matrix( 0.0, nrow=n, ncol=d )
-which.splx <- sample.int( n=nS, size=n, replace=TRUE, prob=weights )
-for (i in 1:n) {
-  j <- which.splx[i]
-  x[i,] <- u[,i] %*% S[,,j]
-}
-return(x) }
 ######################################################################
 mvmeshCombine <- function( mesh1, mesh2 ) {
 # combine 2 meshes, retain type of mesh1

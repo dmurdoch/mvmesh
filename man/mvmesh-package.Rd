@@ -5,13 +5,6 @@
 \description{Define, manipulate and plot multivariate meshes/grids in n-dimensional 
 Euclidean space. Multivariate histograms based on these meshes are provided.}
 \details{
-\tabular{ll}{
-Package: \tab mvmesh\cr
-Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2016-01-05\cr
-License: \tab GPL (>= 3) \cr
-}
 A range of multivariate problems require working with simplices, spheres, balls, 
 rectangular and tubular meshes in dimension n > 1.
 The multivariate histogram functions in this package provide routines to tabulate
@@ -54,6 +47,8 @@ Version history:
  \code{IntersectMultipleSimplicesV}, \code{IntersectMultipleSimplicesH}, \code{Intersect2SimplicesH} \cr
 \item 1.2 added new functions \code{mvmeshFromSVI}, \code{mvmeshfromSimplices}, \code{mvmeshFromVertices}, \code{rtesselation},
    new argument normalize.by.area in \code{histDirectional}, new argument label.octants in \code{histDirectional}.  Speed up 3d plots. 
+\item 1.3 replace \code{rtessellation} with more general \code{rmvmesh}; add argument 'm' to mvmeshFromSVI; rename
+  \code{RectangularMesh} to \code{SolidRectangle}; add \code{HollowRectangle}; fix \code{Icosahedron} to correctly set 'm'.
 }
 }
 
@@ -68,7 +63,7 @@ A single convex simplex can be described/stored in two ways:
 \item A vps x n matrix of (doubles) S; the rows S[1,], S[2, ], etc. are the vertices in R^n.  
 The simplex is the convex hull of the vertices. Note: vps stands for 'vertices per simplex'.
 \item An nV x n matrix of (doubles) vertices V with rows giving the
-        points in R^n, and an integer vector of length vps called SVI (=Simplex Vertex Indices) 
+        points in R^n, and an integer vector of length vps called SVI (Simplex Vertex Indices) 
         that specifies which vertices make up a simplex.  
 }
 
@@ -103,12 +98,13 @@ UnitSphere, edgewise  \tab 3              \tab n-1 \tab n    \cr
 UnitSphere, dyadic    \tab 4              \tab n-1 \tab n    \cr
 UnitBall, edgewise    \tab 5              \tab n   \tab n+1  \cr
 UnitBall, dyadic      \tab 6              \tab n   \tab n+1  \cr
-RectangularMesh       \tab 7              \tab n   \tab 2^n  \cr
+SolidRectangle        \tab 7              \tab n   \tab 2^n  \cr
 Icosahedron           \tab 8              \tab 2   \tab 3    \cr
 PolarSphere           \tab 9              \tab n-1 \tab 2^(n-1) \cr
 PolarBall             \tab 10             \tab n   \tab 2^(n-1) + 1 \cr
 HollowTube            \tab 11             \tab n-1 \tab 2*(n-1) \cr
 SolidTube             \tab 12             \tab n   \tab 2*n \cr
+HollowRectangle       \tab 13             \tab n   \tab 2^(n-1)  \cr
 }                                        
 
 There are two generic S3 methods for objects of class mvmesh: print and plot.  
@@ -148,14 +144,10 @@ title3d("solid and unit simplex in 3d")
 rgl.viewpoint( -45, 15)
 
 # two plots on one window
-open3d()
-mfrow3d( nr=1, nc=2 )
-plot( UnitSphere( n=3, k=2 ), new.plot=FALSE, col="blue")
-title3d("unit sphere in 3d")
+plot( UnitSphere( n=3, k=2 ), col="blue")
 mesh2 <- AffineTransform( UnitBall( n=3,k=2 ), A=diag(c(1,1,1)), shift=c(3,0,0) )
-next3d()
 plot( mesh2, new.plot=FALSE, col="magenta" )
-title3d("solid ball in 3d")
+title3d("unit sphere and ball in 3d")
 
 
 demo(mvmesh) # shows a range of meshes
