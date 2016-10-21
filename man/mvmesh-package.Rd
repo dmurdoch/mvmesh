@@ -49,6 +49,7 @@ Version history:
    new argument normalize.by.area in \code{histDirectional}, new argument label.octants in \code{histDirectional}.  Speed up 3d plots. 
 \item 1.3 replace \code{rtessellation} with more general \code{rmvmesh}; add argument 'm' to mvmeshFromSVI; rename
   \code{RectangularMesh} to \code{SolidRectangle}; add \code{HollowRectangle}; fix \code{Icosahedron} to correctly set 'm'.
+\item 1.4 fix a bug in IntersectMultipleSimplicesH
 }
 }
 

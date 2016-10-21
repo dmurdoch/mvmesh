@@ -1173,52 +1173,61 @@ return( IntersectMultipleSimplicesH( H1, H2 ) ) }
 ##################################################################################
 IntersectMultipleSimplicesH <- function( H1, H2 ) {
 # Similar to IntersectSimplicesV, but now the simplices are given in
-# the H-representation
+# the H-representation. Return the values in V-representation.
 
 stopifnot( ncol(H1)==ncol(H2) )
 n <- ncol(H1)-2
 count <- 0
-S <- array( 0.0, dim=c(n+1,n,0) )
+S <- NULL
 index1 <- integer(0)
 index2 <- index1
 nS1 <- dim(H1)[3]
 nS2 <- dim(H2)[3]
 for (i2 in 1:nS2) {
   for (i1 in 1:nS1) {
-    a <- Intersect2SimplicesH( H1[,,i1], H2[,,i2], tesselate=TRUE )
-    if(!is.null(a$S)) { 
+    a <- Intersect2SimplicesH( H1[,,i1], H2[,,i2], tessellate=TRUE )
+    #cat("return from Intersect2: a=\n"); print(str(a))
+    if ( !is.null(a$S) && (dim(a$S)[1]>0) ) {
       m <- dim(a$S)[3]
       index1 <- c(index1,rep(i1,m))
       index2 <- c(index2,rep(i2,m))
-      S <- abind( S, a$S, force.array=TRUE )      
+      if (is.null(S) ) {
+        S <- a$S
+      } else {
+        S <- abind( S, a$S, force.array=TRUE )    
+      }  
     }
   }
 }
 return( list( S=S, index1=index1, index2=index2 ) )}
 ##################################################################################
-Intersect2SimplicesH <- function( H1, H2, tesselate=FALSE ) {
+Intersect2SimplicesH <- function( H1, H2, tessellate=FALSE ) {
 # intersect two arbitrary simplices given by their H-represenations H1 and H2
-# if tesselate=TRUE, the resulting set is tesselated so that we get 
+# if tessellate=TRUE, the resulting set is tessellated so that we get 
 #
 # Return a list with fields:
 #   H = H-representation of the intersection simplex
 #   V = vertices (V-rep.) of the intersection simplex (NULL if intersection has zero volume)
-#   S = tesselation of the intersection simplex (if tesselate=TRUE, NULL if intersection has zero volume)
-cat("Intersect2...\n")
+#   S = tesselation of the intersection simplex (if tessellate=TRUE)
+#       NULL if tessellate is FALSE or intersection has zero volume
+
+#cat("Intersect2H:  H1="); print(H1); cat("Intersect2H:  H2="); print(H2)
 n <- ncol(H1)-2
 H <- rcdd::redundant( rbind( H1, H2 ), representation="H")$output
 V <- NULL
 S <- NULL
 if( nrow(H) > n) {
   V <- H2Vrep( H )[,,1] 
-  if (tesselate & (nrow(V) > n)) {
-cat("V="); print(V)
-    del.tess <- geometry::delaunayn( V, options="Qz" )
-    S <- array( 0.0, dim=c(n+1,n,nrow(del.tess)) )
-    for (k in 1:nrow(del.tess)) {
-      b <- del.tess[k,]
-      cur.tess <- V[b,]
-      S[,,k] <- cur.tess
+  #cat("Intersect2H:  V="); print(V)  
+  if (tessellate) {
+    if (nrow(V) == n+1) {  # prevent zero volume case
+      new.tess <- geometry::delaunayn( V, options="Qz" )
+      S <- array( 0.0, dim=c(n+1,n,nrow(new.tess)) )
+      for (k in 1:nrow(new.tess)) {
+        b <- new.tess[k,]
+        cur.tess <- V[b,]
+        S[,,k] <- cur.tess
+      }
     }
   }
 }
@@ -1339,7 +1348,7 @@ mvmeshFromVertices <- function( V ) {
 # lower dim. simplices.  Even when the simplices are of dimension n, you may get a 
 # different tessellation than you were expecting: vertices can be grouped in multiple ways.
 
-# tesselate
+# tessellate
 SVI <- t( delaunayn( V ) )
 
 # define sizes

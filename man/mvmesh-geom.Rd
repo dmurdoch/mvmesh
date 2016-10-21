@@ -52,7 +52,7 @@ SatisfyHrep( x, Hsingle )
 HrepCones( S )
 IntersectMultipleSimplicesV( S1, S2 )
 IntersectMultipleSimplicesH( H1, H2 )
-Intersect2SimplicesH( H1, H2, tesselate=FALSE )
+Intersect2SimplicesH( H1, H2, tessellate=FALSE )
 Lift2UnitSimplex(S)
 %TransposeMultipleMatrices(B)
 }
@@ -107,7 +107,7 @@ Lift2UnitSimplex(S)
 }
   \item{Hsingle}{matrix giving the H-representation of a single simplex
 }
-  \item{tesselate}{TRUE to tesselate the resulting intersection
+  \item{tessellate}{TRUE to tessellate the resulting intersection
 }
 % \item{B}{an (m x n x p) array}
 }
