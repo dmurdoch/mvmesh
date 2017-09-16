@@ -46,10 +46,13 @@ Version history:
   \code{histDirectionalAbsoluteeThreshold}, \code{HollowTube}, \code{SolidTube}, \code{Lift2UnitSimplex}, \cr
  \code{IntersectMultipleSimplicesV}, \code{IntersectMultipleSimplicesH}, \code{Intersect2SimplicesH} \cr
 \item 1.2 added new functions \code{mvmeshFromSVI}, \code{mvmeshfromSimplices}, \code{mvmeshFromVertices}, \code{rtesselation},
-   new argument normalize.by.area in \code{histDirectional}, new argument label.octants in \code{histDirectional}.  Speed up 3d plots. 
+   new argument normalize.by.area in \code{histDirectional}, new argument label.orthants in \code{histDirectional}.  Speed up 3d plots. 
 \item 1.3 replace \code{rtessellation} with more general \code{rmvmesh}; add argument 'm' to mvmeshFromSVI; rename
   \code{RectangularMesh} to \code{SolidRectangle}; add \code{HollowRectangle}; fix \code{Icosahedron} to correctly set 'm'.
-\item 1.4 fix a bug in IntersectMultipleSimplicesH
+\item 1.4 fix a bug in \code{IntersectMultipleSimplicesH}.
+\item 1.5 add new return value 'which.simplex' to \code{TallyHrep}; for each data point x[,i], it identifies which simplex contains that point; 
+  minor change in \code{Intersect2SimplicesH}; change 'octant' to 'orthant' to correctly describe what happens in all dimensions;
+  improve \code{IntersectMultipleSimplicesH} and \code{Intersect2SimplicesH}
 }
 }
 

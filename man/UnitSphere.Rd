@@ -37,9 +37,9 @@ LpNorm(x, p)
 }
 \details{\code{UnitSphere} computes a hyperspherical triangle approximation to the unit sphere.
 It calls either \code{UnitSphereDyadic} or \code{UnitSphereEdgewise}
-based on 'method'.  Both work by subdividing the first octant, and then rotating that
-subdivision around to other octants.   This is important for some uses of these functions; it
-guarantees that all vertices of a simplex are in a single octant.
+based on 'method'.  Both work by subdividing the first orthant, and then rotating that
+subdivision around to other orthants.   This is important for some uses of these functions; it
+guarantees that all vertices of a simplex are in a single orthant.
 Note that 'k' has a different meaning for the different methods.  When
 method="dyadic", k specifies the number of dyadic subdivisions.  When method="edgewise", 
 k specifies the number of subdivisions as in \code{\link{UnitSimplex}}, which is then
