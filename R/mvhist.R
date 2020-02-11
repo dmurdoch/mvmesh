@@ -387,9 +387,10 @@ HrepCones <- function( S ) {
 #   H is a (m x (d+2) x ncones) array, with H[,,k] giving the H-rep. of the k-th cone
 #
 
+if ( is.matrix(S) ) { S <- array( S, dim=c( dim(S), 1 ) ) }
 tmp <- dim( S )
 d <- tmp[2]; ncones <- tmp[3]
-zeros <- rep(0,d)
+zeros <- rep(0,nrow(S))
 
 for (j in 1:ncones) {
   # set "l" and "b" columns to 0

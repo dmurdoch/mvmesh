@@ -53,6 +53,7 @@ Version history:
 \item 1.5 add new return value 'which.simplex' to \code{TallyHrep}; for each data point x[,i], it identifies which simplex contains that point; 
   minor change in \code{Intersect2SimplicesH}; change 'octant' to 'orthant' to correctly describe what happens in all dimensions;
   improve \code{IntersectMultipleSimplicesH} and \code{Intersect2SimplicesH}
+\item 1.6 correct an unused argument in documentation.
 }
 }
 

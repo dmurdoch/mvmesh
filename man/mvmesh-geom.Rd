@@ -51,8 +51,8 @@ H2Vrep( H )
 SatisfyHrep( x, Hsingle )
 HrepCones( S )
 IntersectMultipleSimplicesV( S1, S2 )
-IntersectMultipleSimplicesH( H1, H2 )
-Intersect2SimplicesH( H1, H2, tessellate=FALSE )
+IntersectMultipleSimplicesH( H1, H2, skip.redundant=FALSE )
+Intersect2SimplicesH( H1, H2, tessellate=FALSE, skip.redundant=FALSE )
 Lift2UnitSimplex(S)
 %TransposeMultipleMatrices(B)
 }
@@ -74,8 +74,6 @@ Lift2UnitSimplex(S)
 }
   \item{theta}{rotation angle; in 2D, this is a single angle; in 3D is it a vector of length 3,
   with theta[i] giving rotation around i-th axis
-}
-  \item{\dots}{optional parameters to rgl plot commands
 }
   \item{k}{number of subdivisions
 }
@@ -108,6 +106,8 @@ Lift2UnitSimplex(S)
   \item{Hsingle}{matrix giving the H-representation of a single simplex
 }
   \item{tessellate}{TRUE to tessellate the resulting intersection
+  }
+  \item{skip.redundant}{TRUE to skip the call to \code{rcdd::redundant}
 }
 % \item{B}{an (m x n x p) array}
 }

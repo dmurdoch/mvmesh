@@ -130,8 +130,8 @@ if (p != 1.0) {
   }
 }
 
-# if !positive.only, rotate & reflect first orthant to cover all other
-# orthants.  Check for duplicate vertices and edges along axes
+# if !positive.only, rotate & reflect first octant to cover all other
+# octants.  Check for duplicate vertices and edges along axes
 if (!positive.only ) {
   # reflect first orthant into all other orthants
   newptr <- rep( 0L, M )     
@@ -837,6 +837,8 @@ NumVertices <- function( n, k, single=TRUE ) {
 #    a (n-1)-dimensional simplex in R^n
 # if single=TRUE, return a single value v[k,n]
 # otherwise, return the whole matrix v[1:k,1:n]
+# Note that the number of subsimplices is k^(n-1), so no function
+# NumSimplices( ) is needed to compute
 
 # use a recursion formula
   v <- matrix(as.integer(0),k,n)
@@ -1171,9 +1173,10 @@ H1 <- V2Hrep( S1 )
 H2 <- V2Hrep( S2 )
 return( IntersectMultipleSimplicesH( H1, H2 ) ) }
 ##################################################################################
-IntersectMultipleSimplicesH <- function( H1, H2 ) {
+IntersectMultipleSimplicesH <- function( H1, H2, skip.redundant=FALSE ) {
 # Similar to IntersectSimplicesV, but now the simplices are given in
 # the H-representation. Return the values in V-representation.
+# skip.redundant is passed to Intersect2SimplicesH( ).
 
 stopifnot( ncol(H1)==ncol(H2) )
 n <- ncol(H1)-2
@@ -1185,11 +1188,8 @@ nS1 <- dim(H1)[3]
 nS2 <- dim(H2)[3]
 for (i2 in 1:nS2) {
   for (i1 in 1:nS1) {
-#cat("IntersectMultipleH:  i1=",i1,"  i2=",i2,"\n")  
-#if((i1==296) & (i2=8)) { print(H1[,,i1]); print(H2[,,i2]) }
     a <- Intersect2SimplicesH( H1[,,i1], H2[,,i2], tessellate=TRUE )
-#if((i1==296) & (i2=8)) { print(a) }
-#cat("return from Intersect2: a=\n"); print(str(a))
+    #cat("return from Intersect2: a=\n"); print(str(a))
     if ( !is.null(a$S) && (dim(a$S)[1]>0) ) {
       m <- dim(a$S)[3]
       index1 <- c(index1,rep(i1,m))
@@ -1198,35 +1198,44 @@ for (i2 in 1:nS2) {
         S <- a$S
       } else {
         S <- abind( S, a$S, force.array=TRUE )    
-#if (dim(S)[3] <= 21 ) { cat("\n*************************************\n  index1=",index1,"\n  index2=",index2,"\n  dim(S)=",dim(S),"\nS=\n"); print(a$S)}
       }  
     }
   }
 }
+dimnames(S) <- NULL # avoid annoying & meaningless dimnames  
 return( list( S=S, index1=index1, index2=index2 ) )}
 ##################################################################################
-Intersect2SimplicesH <- function( H1, H2, tessellate=FALSE ) {
-# intersect two arbitrary simplices given by their H-represenations H1 and H2.
-# Always return the result in H-representation; if tessellate=TRUE, the resulting simplex V 
-# along with the V-representation of it's tessellation S
-#
+Intersect2SimplicesH <- function( H1, H2, tessellate=FALSE, skip.redundant=FALSE ) {
+# intersect two arbitrary simplices given by their H-represenations H1 and H2
+# if tessellate=TRUE, the resulting set is tessellated so that we get vertices.
+# If the intersection has zero volume, NULL is returned silently.
+# If skip.redundant==TRUE, there is no call to rcdd::redundant, i.e. the caller is
+# guaranteeing that there are no redundant constraints in H1 and H2.  This is
+# faster, but may cause problems later.
+
 # Return a list with fields:
 #   H = H-representation of the intersection simplex
-#   V = vertices (V-rep.) of the intersection simplex, which may have more vertices than
-#       desired (V is NULL if the intersection has zero volume)
+#   V = vertices (V-rep.) of the intersection simplex (NULL if intersection has zero volume)
 #   S = tesselation of the intersection simplex (if tessellate=TRUE)
 #       NULL if tessellate is FALSE or intersection has zero volume
 
-#cat("Intersect2H:  H1="); print(H1); cat("Intersect2H:  H2="); print(H2)
+# if either H1 or H2 is a vector, make it a matrix with 1 row
+if( is.vector( H1 ) ) { H1 <- matrix( H1, nrow=1 ) }
+if( is.vector( H2 ) ) { H2 <- matrix( H2, nrow=1 ) }
+
 n <- ncol(H1)-2
-H <- rcdd::redundant( rbind( H1, H2 ), representation="H")$output
+if (skip.redundant ) {
+  H <- rbind( H1, H2 )
+} else {
+  H <- rcdd::redundant( rbind( H1, H2 ), representation="H")$output
+}
 V <- NULL
 S <- NULL
 if( nrow(H) > n) {
   V <- H2Vrep( H )[,,1] 
   #cat("Intersect2H:  V="); print(V)  
   if (tessellate) {
-    if (nrow(V) > n) {  # prevent zero volume case  CHANGED from nrow(V) == n+1 12 Dec 2016
+    if (nrow(V) > n) {  # prevent zero volume case,  CHANGED from nrow(V) == n+1 to allow multi-faceted intersections 12 Dec 2016
       new.tess <- geometry::delaunayn( V, options="Qz" )
       S <- array( 0.0, dim=c(n+1,n,nrow(new.tess)) )
       for (k in 1:nrow(new.tess)) {

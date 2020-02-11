@@ -1,8 +1,8 @@
-e620caadf7b691cf9aa52a5cafff028f *DESCRIPTION
+ed9749845cbc5b9473633271a03456b4 *DESCRIPTION
 fefca70f8d6ccd1886e0f6a58c9acb48 *NAMESPACE
-71e5e6cf098cdbf545cd5b3a6c41e5c8 *R/mvhist.R
+97f159e8cc1ae11e6099923c307704e4 *R/mvhist.R
 e9f8aef2daf4535fe323f09a7bfb45a7 *R/mvmesh-methods.R
-8d63844df2701fbcc040bafbdc625f20 *R/mvmesh.R
+355107919d11cc341a27184bcbf80f53 *R/mvmesh.R
 182027145ca71327d516ea251cd724ba *demo/00Index
 db61294cc2637a430cf7bb3c94c731e0 *demo/mvhist.R
 71fc9326f8d1ea84cbab90b1aab30d97 *demo/mvmesh.R
@@ -14,8 +14,8 @@ a19b85939e4ec48d95fd367b3a76ca3f *man/PolarSphere.Rd
 951118e939a91357156fe0a4d9f45213 *man/UnitSimplex.Rd
 6193f2c33d0b95c5d9d5b3b2092efb59 *man/UnitSphere.Rd
 fc7328b01d616abdce76cf1ab3196bdf *man/mvhist.Rd
-c73476efb96d72af5062e61d72f85864 *man/mvmesh-geom.Rd
+7bcc6264b35196d2a64068ec465992eb *man/mvmesh-geom.Rd
 3bba5208f0320f2ea6d410413d6e532f *man/mvmesh-methods.Rd
-bb1fc4180a1c8a0e22daa3e97285538a *man/mvmesh-package.Rd
+162d6f7fb86f09e93678826c7fc13b28 *man/mvmesh-package.Rd
 07e4853c1543db207c3bec8bbaa894e8 *man/mvmeshmisc.Rd
 435b8205b637d2a508ce539374b923d3 *man/rmvmesh.Rd
