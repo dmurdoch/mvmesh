@@ -151,7 +151,7 @@ if ( plot.type != "none" ) {
       text3d( 1.2,0,0, "(1,0,0)")
       text3d( 0,1.2,0, "(0,1,0)")
       text3d( 0,0,1.2, "(0,0,1)")    
-      rgl.viewpoint( theta=30, phi=30)  
+      view3d( theta=30, phi=30)  
       
       # plot triangles and spike   
       for (j in 1:ncones) {
@@ -171,7 +171,7 @@ if ( plot.type != "none" ) {
       text3d( 1.2,0,0, texts="(1,0,0)")
       text3d( 0,1.2,0, texts="(0,1,0)")
       text3d( 0,0,1.2, texts="(0,0,1)")    
-      rgl.viewpoint( theta=30, phi=30)   
+      view3d( theta=30, phi=30)   
       
       # next plot all the triangles, shading proportional to count in that direction    
       for (j in 1:ncones) {

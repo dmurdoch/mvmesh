@@ -146,7 +146,7 @@ title("2d solid simplex")
 plot( SolidSimplex( n=3, k=4 ) )
 plot(  UnitSimplex( n=3,k=4), new.plot=FALSE, col="red", lwd=5 )
 title3d("solid and unit simplex in 3d")
-rgl.viewpoint( -45, 15)
+view3d( -45, 15)
 
 # two plots on one window
 plot( UnitSphere( n=3, k=2 ), col="blue")

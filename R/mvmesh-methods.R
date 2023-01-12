@@ -97,7 +97,7 @@ if (mvmesh.type==7L) {
     # draw face k
     jj <- face.grouping[k,]
     if (show.edges) { lines3d( S[jj,1],S[jj,2],S[jj,3], ... ) }
-    if (show.faces) { jj <- jj[1:4]; rgl.quads( S[jj,1], S[jj,2], S[jj,3], ... ) }
+    if (show.faces) { jj <- jj[1:4]; quads3d( S[jj,1], S[jj,2], S[jj,3], ... ) }
   }
 } else {
   if(mvmesh.type==9L) {
@@ -115,12 +115,12 @@ if (mvmesh.type==7L) {
       }
     }
     if (show.faces) { 
-      if (nrow(S)==3) { rgl.triangles( S, ... ) } 
+      if (nrow(S)==3) { triangles3d( S, ... ) } 
       if (nrow(S)==4) { 
         face.grouping <- matrix( c(1,2,3,  1,2,4,  1,3,4,  2,3,4), byrow=TRUE, nrow=4, ncol=3)
         for (k in 1:4) { 
           jj <- face.grouping[k, ]
-          rgl.triangles( S[jj,], ... ) 
+          triangles3d( S[jj,], ... ) 
         }
       } 
       if (nrow(S) > 4) { warning("show.faces does not work in this case") }         
